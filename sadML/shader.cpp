@@ -12,6 +12,10 @@
 		glDeleteShader(shaderId);
 	}
 
+	GLuint Shader::getShaderId() {
+		return shaderId;
+	}
+
 	void Shader::bind() {
 		glUseProgram(shaderId);
 

@@ -6,7 +6,7 @@
 struct Shader {
 	Shader(const char* vertexShaderFilename, const char* fragmentShaderFilename);
 	virtual ~Shader();
-
+	GLuint getShaderId();
 	void bind();
 	void unBind();
 private:

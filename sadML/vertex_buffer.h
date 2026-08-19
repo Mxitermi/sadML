@@ -1,7 +1,7 @@
 #pragma once
 #include <GL/glew.h>
 #include "defines.h"
-#include <cstddef>
+#include <cstdint>
 
 struct VertexBuffer {
 	VertexBuffer(void* data, uint32_t numVertecies) {
