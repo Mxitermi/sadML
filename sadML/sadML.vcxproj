@@ -71,19 +71,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\include;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\david\source\repos\sadML\dependencies\ft2143\ft2143\include;C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\include;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\lib\x86;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\lib\Release\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\include;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\david\source\repos\sadML\dependencies\ft2143\ft2143\include;C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\include;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\lib\x86;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\lib\Release\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\include;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\david\source\repos\sadML\dependencies\ft2143\ft2143\include;C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\include;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\lib\x64;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\lib\Release\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\include;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\david\source\repos\sadML\dependencies\ft2143\ft2143\include;C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\include;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\david\source\repos\sadML\dependencies\SDL3-devel-3.4.14-VC\SDL3-3.4.14\lib\x64;C:\Users\david\source\repos\sadML\dependencies\glew-2.3.1-win32\glew-2.3.1\lib\Release\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -98,6 +98,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\david\source\repos\sadML\dependencies\ft2143\ft2143\release static\vs2026\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -114,6 +115,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\david\source\repos\sadML\dependencies\ft2143\ft2143\release static\vs2026\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -128,6 +130,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\david\source\repos\sadML\dependencies\ft2143\ft2143\release static\vs2026\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,14 +147,17 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\david\source\repos\sadML\dependencies\ft2143\ft2143\release static\vs2026\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Index_buffer.h" />
+    <ClCompile Include="InputManager.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="vertex_buffer.h" />

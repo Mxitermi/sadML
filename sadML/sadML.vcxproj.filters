@@ -43,5 +43,7 @@
     <None Include="basic.vertex">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="font.vertex" />
+    <None Include="font.frag" />
   </ItemGroup>
 </Project>
