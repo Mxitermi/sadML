@@ -1,0 +1,13 @@
+C:/Users/david/source/repos/sadML/dependencies/urrr/CMakeFiles/uninstall.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/CMakeFiles/UpdateAssimpLibsDebugSymbolsAndDLLs.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/CMakeFiles/INSTALL.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/CMakeFiles/ALL_BUILD.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/CMakeFiles/ZERO_CHECK.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/contrib/zlib/CMakeFiles/zlibstatic.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/contrib/zlib/CMakeFiles/INSTALL.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/contrib/zlib/CMakeFiles/ALL_BUILD.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/code/CMakeFiles/assimp.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/code/CMakeFiles/INSTALL.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/test/CMakeFiles/unit.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/test/CMakeFiles/INSTALL.dir
+C:/Users/david/source/repos/sadML/dependencies/urrr/test/headercheck/CMakeFiles/INSTALL.dir

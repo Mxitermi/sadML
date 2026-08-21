@@ -154,11 +154,13 @@
     <ClCompile Include="Index_buffer.h" />
     <ClCompile Include="InputManager.h" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="model_loader.cpp" />
     <ClCompile Include="shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="model_loader.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="vertex_buffer.h" />
   </ItemGroup>

@@ -24,6 +24,12 @@
     <ClCompile Include="Index_buffer.h">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model_loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex_buffer.h">
@@ -35,6 +41,12 @@
     <ClInclude Include="shader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model_loader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="basic.frag">
@@ -43,7 +55,5 @@
     <None Include="basic.vertex">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="font.vertex" />
-    <None Include="font.frag" />
   </ItemGroup>
 </Project>

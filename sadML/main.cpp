@@ -25,6 +25,7 @@
 #include <cmath>
 #include "camera.h";
 #include "InputManager.h";
+#include "model_loader.h"
 
 constexpr float PI = 3.14159265358979323846f / 2;
 
@@ -58,7 +59,7 @@ int main(int argc, char** argv)
     
     std::cout << "Version of local OpenGL: " << glGetString(GL_VERSION) << std::endl;
 
-    Vertex verticies[] = {
+    Vertex fich[] = {
         Vertex{-1.0f, -0.5f, 0.0f,
                 1.0f, 0.0f, 0.0f, 1.0f},
         Vertex{-0.75f, -0.75f, 0.0f,
@@ -88,26 +89,17 @@ int main(int argc, char** argv)
             Vertex{1.0f, -1.0f, 0.0f,
                 1.0f, 0.0f, 0.0f, 1.0f},
     };
-    int numVertecies = 14;
+    
 
-    uint32_t indices[] = {
-        
-        0, 1, 2, 
-        0, 2, 3,
-        3, 4, 2,
-        2, 4, 5,
-        2, 5, 6,
-        2, 7, 8,
-        2, 8, 1,
-        2, 7, 6,
-        6, 10, 9,
-        6, 7, 10,
-        9, 11, 12,
-        9, 10, 12,
-        10, 13, 12
+    ModelLoader mLoader;
 
-    };
-    uint32_t numIndices = 39;
+    VertexCombo test = mLoader.loadObjFromFile("models/monkey.obj");
+
+    Vertex* verticies = test.vertices.data();
+    int numVertecies = test.numVertices;
+
+    uint32_t* indices = test.indices.data();
+    uint32_t numIndices = test.numIndices;
 
     IndexBuffer indexBuffer(indices, numIndices, sizeof(indices[0]));
     VertexBuffer vBuffer(verticies, numVertecies);
@@ -121,9 +113,7 @@ int main(int argc, char** argv)
     float delta = 0.0f;
 
     int cUniformLocation1 = glGetUniformLocation(shader.getShaderId(), "u_color1");
-    glUniform4f(cUniformLocation1, 1.0f, 0.0f, 0.0f, 1.0f);
     int cUniformLocation2 = glGetUniformLocation(shader.getShaderId(), "u_color2");
-    glUniform4f(cUniformLocation2, 0.0f, 1.0f, 0.0f, 1.0f);
     int modelViewProjLocation = glGetUniformLocation(shader.getShaderId(), "u_modelViewProj");
 
     glm::mat4 model = glm::mat4(1.0f);
@@ -137,12 +127,12 @@ int main(int argc, char** argv)
     InputManager inputManager;
 
     bool enableMovement = false;
-
-    
-
-    float cameraSpeed = 3.0f;
+    float cameraSpeed = 7.0f;
     
     glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+
+    glEnable(GL_CULL_FACE); //Aufpassen wenn selber dreiecke erstellen wegen windingorder
+    glEnable(GL_DEPTH_TEST);
 
     float time = 0.0f;
     bool isActive = true;
@@ -173,13 +163,13 @@ int main(int argc, char** argv)
             glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
             SDL_SetWindowRelativeMouseMode(window, false);
         }
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        model = glm::rotate(model, 2.0f * delta, glm::vec3(0, 1, 0));
+        model = glm::rotate(model, 2.5f * delta, glm::vec3(0, 1, 0));
         modelViewProj = camera.getViewProj() * model;
 
-        glUniform4f(cUniformLocation1, sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);
-        glUniform4f(cUniformLocation2, sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);
+        //glUniform4f(cUniformLocation1, sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);
+        //glUniform4f(cUniformLocation2, sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);
         glUniformMatrix4fv(modelViewProjLocation, 1, GL_FALSE, &modelViewProj[0][0]);
 
         vBuffer.bind();

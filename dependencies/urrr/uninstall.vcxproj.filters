@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\david\source\repos\sadML\dependencies\urrr\CMakeFiles\b04790826f0e46e25785d19d51dbadec\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\david\source\repos\sadML\dependencies\assimp-6.0.5\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\david\source\repos\sadML\dependencies\urrr\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{66EC4CE5-F869-388A-AAA9-00D1800AE668}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

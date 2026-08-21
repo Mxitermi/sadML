@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/david/source/repos/sadML/dependencies/urrr/cmake_install.cmake",
+		"C:/Users/david/source/repos/sadML/dependencies/urrr/contrib/zlib/cmake_install.cmake",
+		"C:/Users/david/source/repos/sadML/dependencies/urrr/code/cmake_install.cmake",
+		"C:/Users/david/source/repos/sadML/dependencies/urrr/test/cmake_install.cmake",
+		"C:/Users/david/source/repos/sadML/dependencies/urrr/test/headercheck/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
