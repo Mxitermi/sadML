@@ -1,9 +1,11 @@
 #pragma once
+
 #include <GL/glew.h>
-#include "defines.h"
 #include <cstdint>
+#include "vertex.h"
 
 struct VertexBuffer {
+
 	VertexBuffer(void* data, uint32_t numVertecies) {
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
@@ -13,9 +15,9 @@ struct VertexBuffer {
 		glBufferData(GL_ARRAY_BUFFER, numVertecies * sizeof(Vertex), data, GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, x));
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, position));
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, r));
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
 
 		glBindVertexArray(0);
 	}

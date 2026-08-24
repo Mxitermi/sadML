@@ -20,6 +20,31 @@ public:
 		update();
 	}
 
+	glm::vec3 getPosition() {
+		return position;
+	}
+
+	float getYaw() {
+		return yaw;
+	}
+
+	float getPitch() {
+		return pitch;
+	}
+
+	void setPitch(float p) {
+		pitch = p;
+	}
+
+	void setYaw(float y) {
+		yaw = y;
+	}
+
+	void setPosition(glm::vec3 pos) {
+		position = pos;
+		
+	}
+
 	void onMouseMoved(float xRel, float yRel) {
 		yaw += xRel * mouseSensitivity;
 		pitch -= yRel * mouseSensitivity;
@@ -73,6 +98,6 @@ private:
 	float pitch;
 	float roll; // implementiren später auf Q und E
 	glm::vec3 lookAt;
-	const float mouseSensitivity = 0.3f;
+	const float mouseSensitivity = 0.2f;
 	glm::vec3 up;
 };

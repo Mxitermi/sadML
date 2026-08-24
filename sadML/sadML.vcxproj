@@ -162,6 +162,7 @@
     <ClInclude Include="defines.h" />
     <ClInclude Include="model_loader.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="vertex.h" />
     <ClInclude Include="vertex_buffer.h" />
   </ItemGroup>
   <ItemGroup>

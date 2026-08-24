@@ -1,37 +1,74 @@
-#include "model_loader.h";
-#include "defines.h";
+#include "model_loader.h"
+#include "defines.h"
 #include <fstream>
 #include <vector>
 #include <iterator>
 #include <string>
 #include <sstream>
 
+std::vector<GameObject> ModelLoader::createGameObjects() {
+
+    std::vector<GameObject> objects;
+
+    for (const PathPosition& current : pathForObjToLoad)
+    {
+        VertexCombo cube = loadObjFromFile(current.path);
+
+        models.push_back(
+            std::make_unique<Model>(
+                cube.vertices.data(),
+                cube.numVertices,
+                cube.indices.data(),
+                cube.numIndices
+            )
+        );
+
+        Model* model = models.back().get();
+
+        GameObject gameObject(model, current.id);
+        gameObject.position = current.position;
+
+        objects.push_back(gameObject);
+    }
+
+    return objects;
+
+
+    
+}
+
+void ModelLoader::addObjectToLoad(const char* path, glm::vec3 position, int id) {
+    pathForObjToLoad.push_back(PathPosition(path, position, id));
+}
 
 VertexCombo ModelLoader::loadObjFromFile(const char* path) {
-    
+     
     std::ifstream infile(path);
 
     std::string line;
-    char type;
+    std::string type;
     float x, y, z;
 
     char b;
     int i1, i2, i3, t;
+    int n1, n2, n3;
 
     VertexCombo combo;
+    std::vector<Vertex> normal;
 
     while (std::getline(infile, line)) {
 
         std::stringstream ss(line);
         ss >> type;
-        if (type == 'v') {
+        if (type == "v") {
             ss >> x >> y >> z;
 
             combo.addVertex(x, y, z);
         }
-            
-        if (type == 'f') {
-            ss >> i1 >> b >> t >> b >> t >> i2 >> b >> t >> b >> t >> i3 >> b >> t >> b >> t;
+        
+
+        if (type == "f") {
+            ss >> i1 >> b >> t >> b >> n1 >> i2 >> b >> t >> b >> n2 >> i3 >> b >> t >> b >> n3;
             combo.addIndice(i1 - 1, i2 - 1, i3 - 1);
         }
     }
@@ -41,3 +78,9 @@ VertexCombo ModelLoader::loadObjFromFile(const char* path) {
     return combo;
 }
 
+GameObject* ModelLoader::getObjWithId(uint64_t cId, std::vector<GameObject>& objects) {
+    for (GameObject& obj : objects) {
+        if (obj.id == cId) return &obj;
+    }
+    return nullptr;
+}

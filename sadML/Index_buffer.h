@@ -1,7 +1,9 @@
 #pragma once
+
 #include <GL/glew.h>
-#include "defines.h"
 #include <cstdint>
+
+
 
 
 struct IndexBuffer {
