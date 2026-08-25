@@ -1,6 +1,15 @@
 #pragma once
 #include "defines.h"
-
+struct WindPoint {
+	
+	glm::vec3 position;
+	glm::vec3 momentum;
+	glm::vec3 initalposiiton;
+	void reset() {
+		position = initalposiiton;
+		momentum = glm::vec3(0.0f);
+	}
+};
 
 class AirHandler {
 public:
@@ -10,6 +19,7 @@ public:
 	bool isInfluenced(glm::vec3 position);
 	std::vector<Vertex> getWindBoundingBoxVertecies();
 	std::vector<uint32_t> getWindBoundingBoxIndices();
+	std::vector<WindPoint> createWindLayer(glm::vec3 sp, glm::vec3 bp, float windspacing);
 private:
 	float spacing;
 	int entryPerRow;

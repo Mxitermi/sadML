@@ -34,9 +34,12 @@ uint64_t ModelLoader::nextID = 1000;
 
 constexpr float PI = 3.14159265358979323846f / 2;
 
-void resetSimulation(std::vector<GameObject>& objects) {
+void resetSimulation(std::vector<GameObject>& objects, std::vector<WindPoint>& wind) {
     for (GameObject& obj : objects) {
         obj.reset();
+    }
+    for (WindPoint& w : wind) {
+        w.reset();
     }
 }
 
@@ -80,6 +83,7 @@ int main(int argc, char** argv)
 
     Shader shader("basic.vertex", "basic.frag");
     Shader shader_lines("basic_lines.vertex", "basic.frag");
+    Shader shader_points("basic_points.vertex", "basic.frag");
     shader.bind();
 
     uint64_t perfCounterFrequency = SDL_GetPerformanceFrequency();
@@ -87,6 +91,7 @@ int main(int argc, char** argv)
     float delta = 0.0f;
 
     int modelViewProjLocationLines = glGetUniformLocation(shader_lines.getShaderId(), "u_modelViewProj");
+    int modelViewProjLocationPoints = glGetUniformLocation(shader_points.getShaderId(), "u_modelViewProj");
     int modelViewProjLocation = glGetUniformLocation(shader.getShaderId(), "u_modelViewProj");
     
     Camera camera(90.0f, 800.0f, 600.0f);
@@ -115,20 +120,24 @@ int main(int argc, char** argv)
     
     //Code
 
-    AirHandler airhandler(glm::vec3(-5.0f), glm::vec3(5.0f), 1.0f);
+    AirHandler airhandler(glm::vec3(-5.0f), glm::vec3(5.0f), 0.1f); //fehlender support für rechtecke
     //glm::vec3 influenc = airhandler.getInfluece(glm::vec3(-5.0f));
 
-
+    std::vector<WindPoint> wind = airhandler.createWindLayer(glm::vec3(-5, -2, 5), glm::vec3(5, 2, 5), 0.4f);
+    
     //std::cout << "Ist: " << influenc.x << " " << influenc.y << " " << influenc.z;
 
-    std::vector<Vertex> windVertices = airhandler.getWindBoundingBoxVertecies();
-    VertexBuffer vWindBuffer(
-        windVertices.data(),
-        static_cast<uint32_t>(windVertices.size())
+    std::vector<Vertex> windBoundingBox = airhandler.getWindBoundingBoxVertecies();
+    VertexBuffer vWindBindingBoxBuffer(
+        windBoundingBox.data(),
+        static_cast<uint32_t>(windBoundingBox.size())
     );
     std::vector<uint32_t> windIndices = airhandler.getWindBoundingBoxIndices();
     IndexBuffer iWindBuffer(windIndices.data(), static_cast<uint32_t>(windIndices.size()), sizeof(uint32_t));
 
+    int t = 37;
+
+    std::cout << "test: " << wind[t].position.x << " " << wind[t].position.y << " " << wind[t].position.z;
 
     //Code end
 
@@ -147,8 +156,8 @@ int main(int argc, char** argv)
     glEnable(GL_CULL_FACE); //Aufpassen wenn selber dreiecke erstellen wegen windingorder
     glEnable(GL_DEPTH_TEST);
 
-    resetSimulation(objects);
-
+    resetSimulation(objects, wind);
+    static float timer = 0.0f;
     float time = 0.0f;
     bool isActive = true;
     while (isActive) {
@@ -216,7 +225,7 @@ int main(int argc, char** argv)
                     camera.update();
                     break;
                 case SDLK_RETURN:
-                    resetSimulation(objects);
+                    resetSimulation(objects, wind);
                     time = 0.0f;
                     break;
                 case SDLK_L:
@@ -291,7 +300,7 @@ int main(int argc, char** argv)
             index++;
             object.scale = glm::vec3(0.1f);
 
-            object.momentum += airhandler.getInfluece(object.position) * delta * 2.0f;
+            //object.momentum += airhandler.getInfluece(object.position) * delta * 2.0f;
 
             //object.momentum *= (1-0.1 * delta);
 
@@ -344,7 +353,7 @@ int main(int argc, char** argv)
         shader_lines.bind();
         
         glUniformMatrix4fv(modelViewProjLocationLines, 1, GL_FALSE, &mvp[0][0]);
-        vWindBuffer.bind();
+        vWindBindingBoxBuffer.bind();
         iWindBuffer.bind();
 
         glDrawElements(GL_LINES, static_cast<uint32_t>(windIndices.size()), GL_UNSIGNED_INT, 0);
@@ -353,7 +362,49 @@ int main(int argc, char** argv)
         //glUniform4f(cUniformLocation1, sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);
         //glUniform4f(cUniformLocation2, sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);
         
+        static int lastSecond = -1;
 
+        int currentSecond = static_cast<int>(time);
+
+        
+
+        timer += delta;
+        if (timer >= 0.1f)
+        {
+            timer = 0.0f;
+            std::vector<WindPoint> newWindLayer = airhandler.createWindLayer(glm::vec3(-5, -2, 5), glm::vec3(5, 2, 5), 0.4f);
+            wind.insert(wind.end(), newWindLayer.begin(), newWindLayer.end());
+
+        }
+        index = -1;
+        std::vector<Vertex> windVertex;
+        for (WindPoint &w : wind) {
+            index++;
+            w.momentum += airhandler.getInfluece(w.position) * delta;
+            w.position += w.momentum * delta;
+            if (!airhandler.isInfluenced(w.position)) {
+                indiceForClear.push_back(index);
+            }
+            else {
+                Vertex v;
+                v.position = w.position;
+                v.color = glm::vec4(1.0f);
+                windVertex.push_back(v);
+            }
+        }
+        std::sort(indiceForClear.begin(), indiceForClear.end(), std::greater<int>());
+        for (auto i : indiceForClear)
+            wind.erase(wind.begin() + i);
+        indiceForClear.clear();
+
+       
+
+        shader_points.bind();
+        glUniformMatrix4fv(modelViewProjLocationPoints, 1, GL_FALSE, &mvp[0][0]);
+       
+        VertexBuffer windBuffer(windVertex.data(), static_cast<uint32_t>(windVertex.size()));
+        windBuffer.bind();
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(windVertex.size()));
 
         SDL_GL_SwapWindow(window);
 

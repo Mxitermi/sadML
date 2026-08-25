@@ -170,6 +170,7 @@
     <None Include="basic.frag" />
     <None Include="basic.vertex" />
     <None Include="basic_lines.vertex" />
+    <None Include="basic_points.vertex" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

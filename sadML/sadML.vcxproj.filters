@@ -67,5 +67,8 @@
     <None Include="basic_lines.vertex">
       <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="basic_points.vertex">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
