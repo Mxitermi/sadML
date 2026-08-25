@@ -24,15 +24,21 @@
 #define _USE_MATH_DEFINES 
 #include <cmath>
 #include "camera.h";
-#include "InputManager.h";
 #include "model_loader.h"
 uint64_t ModelLoader::nextID = 1000;
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include "wind.h"
+#include <algorithm>
 
 constexpr float PI = 3.14159265358979323846f / 2;
 
+void resetSimulation(std::vector<GameObject>& objects) {
+    for (GameObject& obj : objects) {
+        obj.reset();
+    }
+}
 
 int main(int argc, char** argv)
 {
@@ -65,37 +71,34 @@ int main(int argc, char** argv)
 
     ModelLoader mLoader;
     
-    mLoader.addObjectToLoad("models/minister_r.obj");
-    mLoader.addObjectToLoad("models/minister_r.obj", glm::vec3(7.0f, 0.0f, 0.0f));
-    
+    mLoader.addObjectToLoad("models/cube.obj", "Cube", glm::vec3(0.0f, 0.0f, 4.9f));
+
+
     std::vector<GameObject> objects = mLoader.createGameObjects();
+    
     std::cout << "Objects: " << objects.size() << "\n";
 
-    
-
     Shader shader("basic.vertex", "basic.frag");
+    Shader shader_lines("basic_lines.vertex", "basic.frag");
     shader.bind();
 
     uint64_t perfCounterFrequency = SDL_GetPerformanceFrequency();
     uint64_t lastCounter = SDL_GetPerformanceCounter();
     float delta = 0.0f;
 
-    int cUniformLocation1 = glGetUniformLocation(shader.getShaderId(), "u_color1");
-    int cUniformLocation2 = glGetUniformLocation(shader.getShaderId(), "u_color2");
+    int modelViewProjLocationLines = glGetUniformLocation(shader_lines.getShaderId(), "u_modelViewProj");
     int modelViewProjLocation = glGetUniformLocation(shader.getShaderId(), "u_modelViewProj");
     
     Camera camera(90.0f, 800.0f, 600.0f);
     camera.translate(glm::vec3(0.0f, 0.0f, 5.0f));
     camera.update();
     
-    InputManager inputManager;
 
-    bool enableMovement = false;
     float cameraSpeed = 7.0f;
     std::ifstream infile("save.sad");
     std::string line;
     std::string type;
-    /*while (std::getline(infile, line)) {
+    while (std::getline(infile, line)) {
         std::stringstream ss(line);
         ss >> type;
         if (type == "C") {
@@ -108,60 +111,191 @@ int main(int argc, char** argv)
             camera.onMouseMoved(0.0f, 0.0f);
             camera.update();
         }
-    }*/
+    }
     
+    //Code
+
+    AirHandler airhandler(glm::vec3(-5.0f), glm::vec3(5.0f), 1.0f);
+    //glm::vec3 influenc = airhandler.getInfluece(glm::vec3(-5.0f));
+
+
+    //std::cout << "Ist: " << influenc.x << " " << influenc.y << " " << influenc.z;
+
+    std::vector<Vertex> windVertices = airhandler.getWindBoundingBoxVertecies();
+    VertexBuffer vWindBuffer(
+        windVertices.data(),
+        static_cast<uint32_t>(windVertices.size())
+    );
+    std::vector<uint32_t> windIndices = airhandler.getWindBoundingBoxIndices();
+    IndexBuffer iWindBuffer(windIndices.data(), static_cast<uint32_t>(windIndices.size()), sizeof(uint32_t));
+
+
+    //Code end
+
+    std::vector<int> indiceForClear;
+
+    bool enableMovement = false;
+    bool moveW = false;
+    bool moveA = false;
+    bool moveS = false;
+    bool moveD = false;
+    bool moveUp = false;
+    bool moveDown = false;
 
     glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
     glEnable(GL_CULL_FACE); //Aufpassen wenn selber dreiecke erstellen wegen windingorder
     glEnable(GL_DEPTH_TEST);
 
+    resetSimulation(objects);
+
     float time = 0.0f;
     bool isActive = true;
     while (isActive) {
-
+        time += delta;
         SDL_Event event;
 
         while (SDL_PollEvent(&event))
         {
-            inputManager.handleInput(event);
+            
+            if (event.type == SDL_EVENT_QUIT)
+            {
+                isActive = false;
+            }
+            else if (event.type == SDL_EVENT_KEY_DOWN) {
+                switch (event.key.key)
+                {
+                case SDLK_F3:
+                    enableMovement = !enableMovement;
+                    if (!enableMovement) {
+                        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+                        SDL_SetWindowRelativeMouseMode(window, false);
+
+                        std::ofstream myfile;
+                        myfile.open("save.sad");
+                        glm::vec3 pos = camera.getPosition();
+                        myfile << "C" << " " << pos.x << " " << pos.y << " " << pos.z << " " << camera.getPitch() << " " << camera.getYaw();
+                        myfile.close();
+                    }
+                    else {
+                        glClearColor(0.05f, 0.07f, 0.05f, 1.0f);
+                        SDL_SetWindowRelativeMouseMode(window, true);
+                    }
+                    
+                    break;
+
+                case SDLK_ESCAPE:
+                    isActive = false;
+                    break;
+
+                case SDLK_W:
+                    moveW = true;
+                    break;
+
+                case SDLK_A:
+                    moveA = true;
+                    break;
+
+                case SDLK_S:
+                    moveS = true;
+                    break;
+
+                case SDLK_D:
+                    moveD = true;
+                    break;
+                case SDLK_SPACE:
+                    moveUp = true;
+                    break;
+                case SDLK_LSHIFT:
+                    moveDown = true;
+                    break;
+                case SDLK_0:
+                    camera.setPosition(glm::vec3(0.0f));
+                    camera.setPitch(0.0f);
+                    camera.setYaw(-90.0f);
+                    camera.update();
+                    break;
+                case SDLK_RETURN:
+                    resetSimulation(objects);
+                    time = 0.0f;
+                    break;
+                case SDLK_L:
+                    objects.push_back(mLoader.addGameObject("Cube"));
+                    break;
+                }
+            }
+            else if (event.type == SDL_EVENT_KEY_UP)
+            {
+                switch (event.key.key)
+                {
+                case SDLK_W:
+                    moveW = false;
+                    break;
+
+                case SDLK_A:
+                    moveA = false;
+                    break;
+
+                case SDLK_S:
+                    moveS = false;
+                    break;
+
+                case SDLK_D:
+                    moveD = false;
+                    break;
+                case SDLK_SPACE:
+                    moveUp = false;
+                    break;
+                case SDLK_LSHIFT:
+                    moveDown = false;
+                    break;
+                }
+
+            }
+
             if (event.type == SDL_EVENT_MOUSE_MOTION && enableMovement) {
                 camera.onMouseMoved(event.motion.xrel, event.motion.yrel);
             }
             
         }
-        time += delta;
-        
-        inputManager.move(camera, delta, cameraSpeed);
-
-        isActive = !inputManager.getShouldQuit();
-        enableMovement = inputManager.getEnableMovement();
-        
         if (enableMovement) {
-            glClearColor(0.05f, 0.07f, 0.05f, 1.0f);
-            SDL_SetWindowRelativeMouseMode(window, true);
+            if (moveW) {
+                camera.moveFront(delta * cameraSpeed);
+            }
+            if (moveA) {
+                camera.moveSideways(delta * cameraSpeed);
+            }
+            if (moveS) {
+                camera.moveFront(-delta * cameraSpeed);
+            }
+            if (moveD) {
+                camera.moveSideways(-delta * cameraSpeed);
+            }
+            if (moveUp) {
+                camera.moveUp(delta * cameraSpeed);
+            }
+            if (moveDown) {
+                camera.moveUp(-delta * cameraSpeed);
+            }
+            camera.update();
         }
-        else {
-            glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-            SDL_SetWindowRelativeMouseMode(window, false);
-            
-            std::ofstream myfile;
-            myfile.open("save.sad");
-            glm::vec3 pos = camera.getPosition();
-            myfile << "C" << " " << pos.x << " " << pos.y << " " << pos.z << " " << camera.getPitch() << " " << camera.getYaw();
-            myfile.close();
-        }
+        
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        
+        glm::mat4 mvp = camera.getViewProj();
+
+        int index = -1;
 
         for (GameObject& object : objects)
         {
+            index++;
+            object.scale = glm::vec3(0.1f);
 
-            object.rotation.x += 0.1f;
-            object.rotation.y += 0.1f;
-            object.rotation.z += 0.1f;
+            object.momentum += airhandler.getInfluece(object.position) * delta * 2.0f;
 
+            //object.momentum *= (1-0.1 * delta);
+
+            object.position += object.momentum * delta;
 
             glm::mat4 model = glm::translate(
                 glm::mat4(1.0f),
@@ -190,16 +324,31 @@ int main(int argc, char** argv)
 
             
 
-            glm::mat4 modelViewProj = camera.getViewProj() * model;
+            glm::mat4 modelViewProj = mvp * model;
             glUniformMatrix4fv(modelViewProjLocation, 1, GL_FALSE, &modelViewProj[0][0]);
             object.model->vBuffer.bind();
             object.model->iBuffer.bind();
 
             glDrawElements(GL_TRIANGLES, object.model->numIndices, GL_UNSIGNED_INT, 0);
 
+            if (!airhandler.isInfluenced(object.position)) {
+                indiceForClear.push_back(index);
+            }
         }
 
+        std::sort(indiceForClear.begin(), indiceForClear.end(), std::greater<int>());
+        for (auto i : indiceForClear)
+            objects.erase(objects.begin() + i);
+        indiceForClear.clear();
+
+        shader_lines.bind();
         
+        glUniformMatrix4fv(modelViewProjLocationLines, 1, GL_FALSE, &mvp[0][0]);
+        vWindBuffer.bind();
+        iWindBuffer.bind();
+
+        glDrawElements(GL_LINES, static_cast<uint32_t>(windIndices.size()), GL_UNSIGNED_INT, 0);
+        shader.bind();
 
         //glUniform4f(cUniformLocation1, sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);
         //glUniform4f(cUniformLocation2, sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);

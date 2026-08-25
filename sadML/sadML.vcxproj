@@ -152,10 +152,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Index_buffer.h" />
-    <ClCompile Include="InputManager.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model_loader.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="wind.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -164,10 +164,12 @@
     <ClInclude Include="shader.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="vertex_buffer.h" />
+    <ClInclude Include="wind.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="basic.frag" />
     <None Include="basic.vertex" />
+    <None Include="basic_lines.vertex" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

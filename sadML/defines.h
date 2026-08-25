@@ -31,9 +31,12 @@ struct GameObject {
 
 	int id;
 
+	glm::vec3 originalPosition;
 	glm::vec3 position;
 	glm::vec3 rotation;
 	glm::vec3 scale;
+
+	glm::vec3 momentum;
 
 	GameObject(Model* m, int i)
 		: model(m),
@@ -42,7 +45,16 @@ struct GameObject {
 		scale(1.0f)
 	{
 		id = i;
+		momentum = glm::vec3(0.0f);
 	}
+
+	void reset() {
+		position = originalPosition;
+		momentum = glm::vec3(0.0f);
+	}
+
+	void destory();
+
 };
 
 

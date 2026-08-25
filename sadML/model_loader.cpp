@@ -10,7 +10,7 @@ std::vector<GameObject> ModelLoader::createGameObjects() {
 
     std::vector<GameObject> objects;
 
-    for (const PathPosition& current : pathForObjToLoad)
+    for (PathPosition& current : pathForObjToLoad)
     {
         VertexCombo cube = loadObjFromFile(current.path);
 
@@ -22,11 +22,13 @@ std::vector<GameObject> ModelLoader::createGameObjects() {
                 cube.numIndices
             )
         );
-
+        current.pos = counter;
+        counter++;
         Model* model = models.back().get();
 
         GameObject gameObject(model, current.id);
         gameObject.position = current.position;
+        gameObject.originalPosition = current.position;
 
         objects.push_back(gameObject);
     }
@@ -37,8 +39,22 @@ std::vector<GameObject> ModelLoader::createGameObjects() {
     
 }
 
-void ModelLoader::addObjectToLoad(const char* path, glm::vec3 position, int id) {
-    pathForObjToLoad.push_back(PathPosition(path, position, id));
+GameObject ModelLoader::addGameObject(std::string name) {
+    for (PathPosition& pp : pathForObjToLoad) {
+        if (pp.name == name) {
+            Model* model = models[pp.pos].get();
+            nextID++;
+            GameObject gameObject(model, nextID);
+            gameObject.position = pp.position;
+            gameObject.originalPosition = pp.position;
+
+            return gameObject;
+        }
+    }
+}
+
+void ModelLoader::addObjectToLoad(const char* path, std::string name, glm::vec3 position, int id) {
+    pathForObjToLoad.push_back(PathPosition(path, position, name, id));
 }
 
 VertexCombo ModelLoader::loadObjFromFile(const char* path) {

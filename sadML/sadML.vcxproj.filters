@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\shaders">
+      <UniqueIdentifier>{c97c0c46-e6cd-4d38-bbbe-d39bd511dc19}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -24,10 +27,10 @@
     <ClCompile Include="Index_buffer.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InputManager.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="model_loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wind.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,13 +53,19 @@
     <ClInclude Include="vertex.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="wind.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="basic.frag">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="basic.vertex">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="basic.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="basic_lines.vertex">
+      <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>
 </Project>
