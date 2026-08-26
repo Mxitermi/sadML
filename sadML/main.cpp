@@ -91,8 +91,8 @@ int main(int argc, char** argv)
     float delta = 0.0f;
 
     int modelViewProjLocationLines = glGetUniformLocation(shader_lines.getShaderId(), "u_modelViewProj");
-    int modelViewProjLocationPoints = glGetUniformLocation(shader_points.getShaderId(), "u_modelViewProj");
     int modelViewProjLocation = glGetUniformLocation(shader.getShaderId(), "u_modelViewProj");
+    int modelViewProjLocationPoints = glGetUniformLocation(shader_points.getShaderId(), "u_modelViewProj");
     
     Camera camera(90.0f, 800.0f, 600.0f);
     camera.translate(glm::vec3(0.0f, 0.0f, 5.0f));
@@ -121,11 +121,13 @@ int main(int argc, char** argv)
     //Code
 
     AirHandler airhandler(glm::vec3(-5.0f), glm::vec3(5.0f), 0.1f); //fehlender support für rechtecke
+    //glm::vec3 influence = airhandler.getInfluece(glm::vec3(2.6f, 2.2f, 2.4f));
+
+    //std::cout << "Ist: " << influence.x << " " << influence.y << " " << influence.z;
     //glm::vec3 influenc = airhandler.getInfluece(glm::vec3(-5.0f));
 
     std::vector<WindPoint> wind = airhandler.createWindLayer(glm::vec3(-5, -2, 5), glm::vec3(5, 2, 5), 0.4f);
-    
-    //std::cout << "Ist: " << influenc.x << " " << influenc.y << " " << influenc.z;
+
 
     std::vector<Vertex> windBoundingBox = airhandler.getWindBoundingBoxVertecies();
     VertexBuffer vWindBindingBoxBuffer(
@@ -134,11 +136,6 @@ int main(int argc, char** argv)
     );
     std::vector<uint32_t> windIndices = airhandler.getWindBoundingBoxIndices();
     IndexBuffer iWindBuffer(windIndices.data(), static_cast<uint32_t>(windIndices.size()), sizeof(uint32_t));
-
-    int t = 37;
-
-    std::cout << "test: " << wind[t].position.x << " " << wind[t].position.y << " " << wind[t].position.z;
-
     //Code end
 
     std::vector<int> indiceForClear;
@@ -151,7 +148,7 @@ int main(int argc, char** argv)
     bool moveUp = false;
     bool moveDown = false;
 
-    glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glEnable(GL_CULL_FACE); //Aufpassen wenn selber dreiecke erstellen wegen windingorder
     glEnable(GL_DEPTH_TEST);
@@ -177,7 +174,7 @@ int main(int argc, char** argv)
                 case SDLK_F3:
                     enableMovement = !enableMovement;
                     if (!enableMovement) {
-                        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+                        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                         SDL_SetWindowRelativeMouseMode(window, false);
 
                         std::ofstream myfile;
@@ -187,7 +184,7 @@ int main(int argc, char** argv)
                         myfile.close();
                     }
                     else {
-                        glClearColor(0.05f, 0.07f, 0.05f, 1.0f);
+                        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
                         SDL_SetWindowRelativeMouseMode(window, true);
                     }
                     
@@ -231,6 +228,8 @@ int main(int argc, char** argv)
                 case SDLK_L:
                     objects.push_back(mLoader.addGameObject("Cube"));
                     break;
+                case SDLK_P:
+                    timer = 0.1f;
                 }
             }
             else if (event.type == SDL_EVENT_KEY_UP)
@@ -240,7 +239,7 @@ int main(int argc, char** argv)
                 case SDLK_W:
                     moveW = false;
                     break;
-
+  
                 case SDLK_A:
                     moveA = false;
                     break;
@@ -294,7 +293,7 @@ int main(int argc, char** argv)
         glm::mat4 mvp = camera.getViewProj();
 
         int index = -1;
-
+        shader.bind();
         for (GameObject& object : objects)
         {
             index++;
@@ -330,8 +329,6 @@ int main(int argc, char** argv)
             );
 
             model = glm::scale(model, object.scale);
-
-            
 
             glm::mat4 modelViewProj = mvp * model;
             glUniformMatrix4fv(modelViewProjLocation, 1, GL_FALSE, &modelViewProj[0][0]);
@@ -372,7 +369,7 @@ int main(int argc, char** argv)
         if (timer >= 0.1f)
         {
             timer = 0.0f;
-            std::vector<WindPoint> newWindLayer = airhandler.createWindLayer(glm::vec3(-5, -2, 5), glm::vec3(5, 2, 5), 0.4f);
+            std::vector<WindPoint> newWindLayer = airhandler.createWindLayer(glm::vec3(-5.0f, -2.0f, 5.0f), glm::vec3(5.0f, 2.0f, 5.0f), 0.4f);
             wind.insert(wind.end(), newWindLayer.begin(), newWindLayer.end());
 
         }
@@ -401,7 +398,6 @@ int main(int argc, char** argv)
 
         shader_points.bind();
         glUniformMatrix4fv(modelViewProjLocationPoints, 1, GL_FALSE, &mvp[0][0]);
-       
         VertexBuffer windBuffer(windVertex.data(), static_cast<uint32_t>(windVertex.size()));
         windBuffer.bind();
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(windVertex.size()));

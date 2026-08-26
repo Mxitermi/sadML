@@ -36,7 +36,7 @@ AirHandler::AirHandler(glm::vec3 sp, glm::vec3 bp, float s) {
 		entryPerRow++;
 		for (float y = smallPos.y; y <= bigPos.y + spacing; y += spacing) {
 			for (float x = smallPos.x; x <= bigPos.x + spacing; x += spacing) {
-				windDirection.push_back(glm::vec3(z-x+y, x, y +y * x));
+				windDirection.push_back(glm::vec3(-y, x, -z));
 			}
 		}
 	}
@@ -46,32 +46,53 @@ glm::vec3 AirHandler::getInfluece(glm::vec3 position) {
 
 	//später blend, also prozentuale anteil vom nächsten
 
-	float posX;
-	float posY;
-	float posZ;
+	float posXB;
+	float posXT;
+	float posYB;
+	float posYT;
+	float posZB;
+	float posZT;
+
 
 	if (position.x > bigPos.x) return windDirection[0];
 	if (position.y > bigPos.y) return windDirection[0];
 	if (position.z > bigPos.z) return windDirection[0];
 
-	int indexXF = std::round((position.x - smallPos.x) / spacing);
-	posX = smallPos.x + indexXF * spacing;
+	int indexXB = std::floor((position.x - smallPos.x) / spacing);
+	int indexXT = std::ceil((position.x - smallPos.x) / spacing);
+	posXB = smallPos.x + indexXB * spacing;
+	posXT = smallPos.x + indexXT * spacing;
+	float deltaX = std::abs(position.x - posXB);
 
-	int indexYF = std::round((position.y - smallPos.y) / spacing);
-	posY = smallPos.y + indexYF * spacing;
+	int indexYB = std::floor((position.y - smallPos.y) / spacing);
+	int indexYT = std::ceil((position.y - smallPos.y) / spacing);
+	posYB = smallPos.y + indexYB * spacing;
+	posYT = smallPos.y + indexYT * spacing;
+	float deltaY = std::abs(position.y - posYB);
 
-	int indexZF = std::round((position.z - smallPos.z) / spacing);
-	posZ = smallPos.z + indexZF * spacing;
+	int indexZB = std::floor((position.z - smallPos.z) / spacing);
+	int indexZT = std::ceil((position.z - smallPos.z) / spacing);
+	posZB = smallPos.z + indexZB * spacing;
+	posZT = smallPos.z + indexZT * spacing;
+	float deltaZ = std::abs(position.z - posZB);
 
-	int iX = posX / spacing + entryPerRow / 2 - 1;
-	int iY = posY / spacing + entryPerRow / 2 - 1;
-	int iZ = posZ / spacing + entryPerRow / 2 - 1;
+	int iXB = posXB / spacing + entryPerRow / 2 - 1;
+	int iXT = posXT / spacing + entryPerRow / 2 - 1;
+	int iYB = posYB / spacing + entryPerRow / 2 - 1;
+	int iYT = posYT / spacing + entryPerRow / 2 - 1;
+	int iZB = posZB / spacing + entryPerRow / 2 - 1;
+	int iZT = posZT / spacing + entryPerRow / 2 - 1;
 
-	int index = iX + entryPerRow * iY + entryPerRow * entryPerRow * iZ;
+	int indexB = iXB + entryPerRow * iYB + entryPerRow * entryPerRow * iZB;
+	int indexT = iXT + entryPerRow * iYT + entryPerRow * entryPerRow * iZT;
 
-	//std::cout << "Should: " << posX << " " << posY << " " << posZ << std::endl;
 
-	return windDirection[index];
+	glm::vec3 wind;
+	glm::vec3 delta = glm::vec3(deltaX, deltaY, deltaZ);
+	wind = windDirection[indexB] * delta + windDirection[indexT] * (glm::vec3(spacing) -delta);
+	
+
+	return wind;
 }
 
 bool AirHandler::isInfluenced(glm::vec3 position) {
