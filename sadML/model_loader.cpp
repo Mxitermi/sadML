@@ -39,14 +39,14 @@ std::vector<GameObject> ModelLoader::createGameObjects() {
     
 }
 
-GameObject ModelLoader::addGameObject(std::string name) {
+GameObject ModelLoader::addGameObject(std::string name, glm::vec3 position) {
     for (PathPosition& pp : pathForObjToLoad) {
         if (pp.name == name) {
             Model* model = models[pp.pos].get();
             nextID++;
             GameObject gameObject(model, nextID);
-            gameObject.position = pp.position;
-            gameObject.originalPosition = pp.position;
+            gameObject.position = position;
+            gameObject.originalPosition = position;
 
             return gameObject;
         }

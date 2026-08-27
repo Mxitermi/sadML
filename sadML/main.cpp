@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 
     ModelLoader mLoader;
     
-    mLoader.addObjectToLoad("models/cube.obj", "Cube", glm::vec3(0.0f, 0.0f, 4.9f));
+    mLoader.addObjectToLoad("models/cube.obj", "Cube", glm::vec3(0.0f, 0.0f, 6.0f));
 
 
     std::vector<GameObject> objects = mLoader.createGameObjects();
@@ -251,7 +251,7 @@ int main(int argc, char** argv)
                     time = 0.0f;
                     break;
                 case SDLK_L:
-                    objects.push_back(mLoader.addGameObject("Cube"));
+                    objects.push_back(mLoader.addGameObject("Cube", glm::vec3(0.0f)));
                     break;
                 case SDLK_P:
                     timer = 0.1f;
@@ -324,9 +324,8 @@ int main(int argc, char** argv)
         for (GameObject& object : objects)
         {
             index++;
-            object.scale = glm::vec3(0.1f);
 
-            //object.momentum += airhandler.getInfluece(object.position) * delta * windStrength;
+            object.momentum += airhandler.getInfluece(object.position) * delta * windStrength;
 
             //object.momentum *= (1-0.1 * delta);
 
@@ -412,7 +411,9 @@ int main(int argc, char** argv)
             else {
                 Vertex v;
                 v.position = w.position;
-                v.color = glm::vec4(1.0f);
+                float speed = glm::length(w.momentum);
+                float t = glm::clamp(speed / 3.5f, 0.0f, 1.0f);
+                v.color = glm::vec4(t, 1.0 - t, 0.0, 1.0);
                 windVertex.push_back(v);
             }
         }
@@ -549,7 +550,7 @@ int main(int argc, char** argv)
                 ImGui::Text("Gameobject settings");
 
                 if (ImGui::Button("Spawn Cube")) {
-                    objects.push_back(mLoader.addGameObject("Cube"));
+                    objects.push_back(mLoader.addGameObject("Cube", glm::vec3(0.0f)));
                 }
 
                 ImGui::EndTabItem();

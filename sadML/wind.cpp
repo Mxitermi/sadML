@@ -158,6 +158,27 @@ void AirHandler::setNumbersWind(glm::vec3 direction) {
 	}
 }
 
+
+std::vector<WindPoint> AirHandler::createWindLayer(glm::vec3 sp, glm::vec3 bp, float windspacing)
+{
+	std::vector<WindPoint> wind;
+
+	for (float y = sp.y; y <= bp.y; y += windspacing)
+	{
+		for (float x = sp.x; x <= bp.x; x += windspacing)
+		{
+			WindPoint w;
+			w.position = glm::vec3(x, y, bp.z);
+			w.initalposiiton = w.position;
+			w.momentum = glm::vec3(0.0f);
+
+			wind.push_back(w);
+		}
+	}
+
+	return wind;
+}
+
 void AirHandler::setVariablesWind(std::string equX, std::string equY, std::string equZ) {
 
 	float dirX = 0;
@@ -253,10 +274,11 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 				if (stateMul) a.direction.y *= a.position.x;
 				if (stateDiv) {
 					float pos = a.position.x;
-					if(pos != 0)  a.direction.y /= pos;
+					if (pos != 0)  a.direction.y /= pos;
 				}
 			}
-		}else if (c == 'y') {
+		}
+		else if (c == 'y') {
 			for (AirVertex& a : windDirection) {
 				if (statePlus) a.direction.y += a.position.y;
 				if (stateMinus) a.direction.y -= a.position.y;
@@ -266,7 +288,8 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					if (pos != 0)  a.direction.y /= pos;
 				}
 			}
-		}else if (c == 'z') {
+		}
+		else if (c == 'z') {
 			for (AirVertex& a : windDirection) {
 				if (statePlus) a.direction.y += a.position.z;
 				if (stateMinus) a.direction.y -= a.position.z;
@@ -286,28 +309,28 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 			}
 		}
 		else if (c == '+') {
-			 statePlus = true;
-			 stateMinus = false;
-			 stateMul = false;
-			 stateDiv = false;
+			statePlus = true;
+			stateMinus = false;
+			stateMul = false;
+			stateDiv = false;
 		}
 		else if (c == '-') {
-			 statePlus = false;
-			 stateMinus = true;
-			 stateMul = false;
-			 stateDiv = false;
+			statePlus = false;
+			stateMinus = true;
+			stateMul = false;
+			stateDiv = false;
 		}
 		else if (c == '*') {
-			 statePlus = false;
-			 stateMinus = false;
-			 stateMul = true;
-			 stateDiv = false;
+			statePlus = false;
+			stateMinus = false;
+			stateMul = true;
+			stateDiv = false;
 		}
 		else if (c == '/') {
-			 statePlus = false;
-			 stateMinus = false;
-			 stateMul = false;
-			 stateDiv = true;
+			statePlus = false;
+			stateMinus = false;
+			stateMul = false;
+			stateDiv = true;
 		}
 	}
 	statePlus = true;
@@ -383,27 +406,5 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 			stateDiv = true;
 		}
 	}
-	
+
 }
-
-
-std::vector<WindPoint> AirHandler::createWindLayer(glm::vec3 sp, glm::vec3 bp, float windspacing)
-{
-	std::vector<WindPoint> wind;
-
-	for (float y = sp.y; y <= bp.y; y += windspacing)
-	{
-		for (float x = sp.x; x <= bp.x; x += windspacing)
-		{
-			WindPoint w;
-			w.position = glm::vec3(x, y, bp.z);
-			w.initalposiiton = w.position;
-			w.momentum = glm::vec3(0.0f);
-
-			wind.push_back(w);
-		}
-	}
-
-	return wind;
-}
-

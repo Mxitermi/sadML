@@ -6,7 +6,7 @@
 
 struct VertexBuffer {
 
-	VertexBuffer(void* data, uint32_t numVertecies, bool t = false) {
+	VertexBuffer(void* data, uint32_t numVertecies) {
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
@@ -16,14 +16,14 @@ struct VertexBuffer {
 
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, position));
-		if (!t) {
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-		}
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+		
 		
 
 		glBindVertexArray(0);
 	}
+
 	virtual ~VertexBuffer() {
 		glDeleteBuffers(1, &bufferId);
 	}
