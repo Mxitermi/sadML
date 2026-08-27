@@ -489,8 +489,9 @@ int main(int argc, char** argv)
                 }
 
                 if (currentWind == 2) {
-                    if (ImGui::CollapsingHeader("Custom Wind"))
+                    if (ImGui::CollapsingHeader("Custom Wind normal"))
                     {
+                        /*
                         ImGui::SliderFloat(
                             "X",
                             &customWindDirectionX,
@@ -511,9 +512,22 @@ int main(int argc, char** argv)
                             1.0f
                         );
                     }
-                    
+
                     airhandler.setNumbersWind(glm::vec3(customWindDirectionX, customWindDirectionY, customWindDirectionZ));
-                    ImGui::Separator();
+                    */
+
+                        static char x[128] = "";
+                        static char y[128] = "";
+                        static char z[128] = "";
+
+                        ImGui::InputText("X", x, IM_ARRAYSIZE(x));
+                        ImGui::InputText("Y", y, IM_ARRAYSIZE(y));
+                        ImGui::InputText("Z", z, IM_ARRAYSIZE(z));
+
+                        if(ImGui::Button("refresh")) airhandler.setVariablesWind(x, y, z);
+
+                        ImGui::Separator();
+                    }
                 }
 
                 ImGui::SliderFloat(

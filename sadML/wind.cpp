@@ -158,6 +158,235 @@ void AirHandler::setNumbersWind(glm::vec3 direction) {
 	}
 }
 
+void AirHandler::setVariablesWind(std::string equX, std::string equY, std::string equZ) {
+
+	float dirX = 0;
+
+	plannedWinds(WindType::Nothing);
+
+	bool statePlus = true;
+	bool stateMinus = false;
+	bool stateMul = false;
+	bool stateDiv = false;
+
+	for (char c : equX)
+	{
+		if (c == 'x') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.x += a.position.x;
+				if (stateMinus) a.direction.x -= a.position.x;
+				if (stateMul) a.direction.x *= a.position.x;
+				if (stateDiv) {
+					float pos = a.position.x;
+					if (pos != 0)  a.direction.x /= pos;
+				}
+			}
+		}
+		else if (c == 'y') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.x += a.position.y;
+				if (stateMinus) a.direction.x -= a.position.y;
+				if (stateMul) a.direction.x *= a.position.y;
+				if (stateDiv) {
+					float pos = a.position.y;
+					if (pos != 0)  a.direction.x /= pos;
+				}
+			}
+		}
+		else if (c == 'z') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.x += a.position.z;
+				if (stateMinus) a.direction.x -= a.position.z;
+				if (stateMul) a.direction.x *= a.position.z;
+				if (stateDiv) {
+					float pos = a.position.z;
+					if (pos != 0)  a.direction.x /= pos;
+				}
+
+			}
+		}
+		else if (c == '1') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.x += 1;
+				if (stateMinus) a.direction.x -= 1;
+				if (stateMul) a.direction.x *= 1;
+				if (stateDiv) a.direction.x /= 1;
+			}
+		}
+		else if (c == '+') {
+			statePlus = true;
+			stateMinus = false;
+			stateMul = false;
+			stateDiv = false;
+		}
+		else if (c == '-') {
+			statePlus = false;
+			stateMinus = true;
+			stateMul = false;
+			stateDiv = false;
+		}
+		else if (c == '*') {
+			statePlus = false;
+			stateMinus = false;
+			stateMul = true;
+			stateDiv = false;
+		}
+		else if (c == '/') {
+			statePlus = false;
+			stateMinus = false;
+			stateMul = false;
+			stateDiv = true;
+		}
+	}
+
+	statePlus = true;
+	stateMinus = false;
+	stateMul = false;
+	stateDiv = false;
+
+	for (char c : equY)
+	{
+		if (c == 'x') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.y += a.position.x;
+				if (stateMinus) a.direction.y -= a.position.x;
+				if (stateMul) a.direction.y *= a.position.x;
+				if (stateDiv) {
+					float pos = a.position.x;
+					if(pos != 0)  a.direction.y /= pos;
+				}
+			}
+		}else if (c == 'y') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.y += a.position.y;
+				if (stateMinus) a.direction.y -= a.position.y;
+				if (stateMul) a.direction.y *= a.position.y;
+				if (stateDiv) {
+					float pos = a.position.y;
+					if (pos != 0)  a.direction.y /= pos;
+				}
+			}
+		}else if (c == 'z') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.y += a.position.z;
+				if (stateMinus) a.direction.y -= a.position.z;
+				if (stateMul) a.direction.y *= a.position.z;
+				if (stateDiv) {
+					float pos = a.position.z;
+					if (pos != 0)  a.direction.y /= pos;
+				}
+			}
+		}
+		else if (c == '1') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.y += 1;
+				if (stateMinus) a.direction.y -= 1;
+				if (stateMul) a.direction.y *= 1;
+				if (stateDiv) a.direction.y /= 1;
+			}
+		}
+		else if (c == '+') {
+			 statePlus = true;
+			 stateMinus = false;
+			 stateMul = false;
+			 stateDiv = false;
+		}
+		else if (c == '-') {
+			 statePlus = false;
+			 stateMinus = true;
+			 stateMul = false;
+			 stateDiv = false;
+		}
+		else if (c == '*') {
+			 statePlus = false;
+			 stateMinus = false;
+			 stateMul = true;
+			 stateDiv = false;
+		}
+		else if (c == '/') {
+			 statePlus = false;
+			 stateMinus = false;
+			 stateMul = false;
+			 stateDiv = true;
+		}
+	}
+	statePlus = true;
+	stateMinus = false;
+	stateMul = false;
+	stateDiv = false;
+
+	for (char c : equZ)
+	{
+		if (c == 'x') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.z += a.position.x;
+				if (stateMinus) a.direction.z -= a.position.x;
+				if (stateMul) a.direction.z *= a.position.x;
+				if (stateDiv) {
+					float pos = a.position.x;
+					if (pos != 0)  a.direction.z /= pos;
+				}
+			}
+		}
+		else if (c == 'y') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.z += a.position.y;
+				if (stateMinus) a.direction.z -= a.position.y;
+				if (stateMul) a.direction.z *= a.position.y;
+				if (stateDiv) {
+					float pos = a.position.y;
+					if (pos != 0)  a.direction.z /= pos;
+				}
+			}
+		}
+		else if (c == 'z') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.z += a.position.z;
+				if (stateMinus) a.direction.z -= a.position.z;
+				if (stateMul) a.direction.z *= a.position.z;
+				if (stateDiv) {
+					float pos = a.position.z;
+					if (pos != 0)  a.direction.z /= pos;
+				}
+			}
+		}
+		else if (c == '1') {
+			for (AirVertex& a : windDirection) {
+				if (statePlus) a.direction.z += 1;
+				if (stateMinus) a.direction.z -= 1;
+				if (stateMul) a.direction.z *= 1;
+				if (stateDiv) a.direction.z /= 1;
+			}
+		}
+		else if (c == '+') {
+			statePlus = true;
+			stateMinus = false;
+			stateMul = false;
+			stateDiv = false;
+		}
+		else if (c == '-') {
+			statePlus = false;
+			stateMinus = true;
+			stateMul = false;
+			stateDiv = false;
+		}
+		else if (c == '*') {
+			statePlus = false;
+			stateMinus = false;
+			stateMul = true;
+			stateDiv = false;
+		}
+		else if (c == '/') {
+			statePlus = false;
+			stateMinus = false;
+			stateMul = false;
+			stateDiv = true;
+		}
+	}
+	
+}
+
+
 std::vector<WindPoint> AirHandler::createWindLayer(glm::vec3 sp, glm::vec3 bp, float windspacing)
 {
 	std::vector<WindPoint> wind;

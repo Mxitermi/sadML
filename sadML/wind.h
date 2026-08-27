@@ -1,5 +1,6 @@
 #pragma once
 #include "defines.h"
+#include <string>
 struct WindPoint {
 	
 	glm::vec3 position;
@@ -34,7 +35,7 @@ public:
 	std::vector<uint32_t> getWindBoundingBoxIndices();
 	std::vector<WindPoint> createWindLayer(glm::vec3 sp, glm::vec3 bp, float windspacing);
 	void plannedWinds(WindType type);
-	//void setVariablesWind -> kommt noch
+	void setVariablesWind(std::string equX, std::string equY, std::string equZ);
 	void setNumbersWind(glm::vec3 direction);
 private:
 	float spacing;
