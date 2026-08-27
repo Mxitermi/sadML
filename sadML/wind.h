@@ -11,15 +11,31 @@ struct WindPoint {
 	}
 };
 
+struct AirVertex {
+	glm::vec3 position;
+	glm::vec3 direction;
+};
+
+enum class WindType
+{
+	Default,
+	Custom,
+	Nothing,
+	zVortex
+};
+
 class AirHandler {
 public:
 	AirHandler(glm::vec3 smallPos, glm::vec3 bigPos, float spacing);
 	glm::vec3 getInfluece(glm::vec3 position);
-	std::vector<glm::vec3> windDirection;
+	std::vector<AirVertex> windDirection;
 	bool isInfluenced(glm::vec3 position);
 	std::vector<Vertex> getWindBoundingBoxVertecies();
 	std::vector<uint32_t> getWindBoundingBoxIndices();
 	std::vector<WindPoint> createWindLayer(glm::vec3 sp, glm::vec3 bp, float windspacing);
+	void plannedWinds(WindType type);
+	//void setVariablesWind -> kommt noch
+	void setNumbersWind(glm::vec3 direction);
 private:
 	float spacing;
 	int entryPerRow;

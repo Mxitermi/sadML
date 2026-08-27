@@ -36,7 +36,10 @@ AirHandler::AirHandler(glm::vec3 sp, glm::vec3 bp, float s) {
 		entryPerRow++;
 		for (float y = smallPos.y; y <= bigPos.y + spacing; y += spacing) {
 			for (float x = smallPos.x; x <= bigPos.x + spacing; x += spacing) {
-				windDirection.push_back(glm::vec3(-y, x, -z));
+				AirVertex a;
+				a.position = glm::vec3(x, y, z);
+				a.direction = glm::vec3(0.0f, 0.0f, -1.0f);
+				windDirection.push_back(a);
 			}
 		}
 	}
@@ -54,9 +57,9 @@ glm::vec3 AirHandler::getInfluece(glm::vec3 position) {
 	float posZT;
 
 
-	if (position.x > bigPos.x) return windDirection[0];
-	if (position.y > bigPos.y) return windDirection[0];
-	if (position.z > bigPos.z) return windDirection[0];
+	if (position.x > bigPos.x) return windDirection[0].direction;
+	if (position.y > bigPos.y) return windDirection[0].direction;
+	if (position.z > bigPos.z) return windDirection[0].direction;
 
 	int indexXB = std::floor((position.x - smallPos.x) / spacing);
 	int indexXT = std::ceil((position.x - smallPos.x) / spacing);
@@ -89,7 +92,7 @@ glm::vec3 AirHandler::getInfluece(glm::vec3 position) {
 
 	glm::vec3 wind;
 	glm::vec3 delta = glm::vec3(deltaX, deltaY, deltaZ);
-	wind = windDirection[indexB] * delta + windDirection[indexT] * (glm::vec3(spacing) -delta);
+	wind = windDirection[indexB].direction * delta + windDirection[indexT].direction * (glm::vec3(spacing) -delta);
 	
 
 	return wind;
@@ -127,6 +130,34 @@ void AirHandler::addIndice(float i, float j) {
 	windBoundingBoxIndices.push_back(j);
 }
 
+void AirHandler::plannedWinds(WindType type) {
+	if (type == WindType::Default) {
+		for (AirVertex &a : windDirection) {
+			a.direction.x = 0.0f;
+			a.direction.y = 0.0f;
+			a.direction.z = -1.0f;
+		}
+	}else if (type == WindType::Nothing) {
+		for (AirVertex& a : windDirection) {
+			a.direction.x = 0.0f;
+			a.direction.y = 0.0f;
+			a.direction.z = 0.0f;
+		}
+	}else if (type == WindType::zVortex) {
+		for (AirVertex& a : windDirection) {
+			a.direction.x = -a.position.y;
+			a.direction.y = a.position.x;
+			a.direction.z = -1.0f;
+		}
+	}
+}
+
+void AirHandler::setNumbersWind(glm::vec3 direction) {
+	for (AirVertex& a : windDirection) {
+		a.direction = direction;
+	}
+}
+
 std::vector<WindPoint> AirHandler::createWindLayer(glm::vec3 sp, glm::vec3 bp, float windspacing)
 {
 	std::vector<WindPoint> wind;
@@ -146,3 +177,4 @@ std::vector<WindPoint> AirHandler::createWindLayer(glm::vec3 sp, glm::vec3 bp, f
 
 	return wind;
 }
+

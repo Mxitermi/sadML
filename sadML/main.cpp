@@ -3,6 +3,11 @@
 #include <GL/glew.h>
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlrenderer3.h>
+
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -58,10 +63,9 @@ int main(int argc, char** argv)
 
     SDL_GL_SetSwapInterval(1);
     
-    window = SDL_CreateWindow("SAD", 800, 600, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("SAD", 1100, 600, SDL_WINDOW_OPENGL);
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
 
-    
 
     GLenum err = glewInit();
     if (err != GLEW_OK) {
@@ -71,6 +75,19 @@ int main(int argc, char** argv)
     }
     
     std::cout << "Version of local OpenGL: " << glGetString(GL_VERSION) << std::endl;
+
+    glViewport(0, 0, 800, 600);
+
+    IMGUI_CHECKVERSION();
+
+    ImGui::CreateContext();
+
+    ImGuiIO& io = ImGui::GetIO();
+
+  
+
+    ImGui_ImplSDL3_InitForOpenGL(window, glContext);
+    ImGui_ImplOpenGL3_Init("#version 330");
 
     ModelLoader mLoader;
     
@@ -148,6 +165,12 @@ int main(int argc, char** argv)
     bool moveUp = false;
     bool moveDown = false;
 
+    float windStrength = 1.0f;
+    bool spawnWindParticles = true;
+    float customWindDirectionX = 0.0f;
+    float customWindDirectionY = 0.0f;
+    float customWindDirectionZ = -1.0f;
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glEnable(GL_CULL_FACE); //Aufpassen wenn selber dreiecke erstellen wegen windingorder
@@ -161,9 +184,11 @@ int main(int argc, char** argv)
         time += delta;
         SDL_Event event;
 
+        
+
         while (SDL_PollEvent(&event))
         {
-            
+            ImGui_ImplSDL3_ProcessEvent(&event);
             if (event.type == SDL_EVENT_QUIT)
             {
                 isActive = false;
@@ -288,6 +313,8 @@ int main(int argc, char** argv)
             camera.update();
         }
         
+       
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 mvp = camera.getViewProj();
@@ -299,7 +326,7 @@ int main(int argc, char** argv)
             index++;
             object.scale = glm::vec3(0.1f);
 
-            //object.momentum += airhandler.getInfluece(object.position) * delta * 2.0f;
+            //object.momentum += airhandler.getInfluece(object.position) * delta * windStrength;
 
             //object.momentum *= (1-0.1 * delta);
 
@@ -366,7 +393,7 @@ int main(int argc, char** argv)
         
 
         timer += delta;
-        if (timer >= 0.1f)
+        if (timer >= 0.1f && spawnWindParticles)
         {
             timer = 0.0f;
             std::vector<WindPoint> newWindLayer = airhandler.createWindLayer(glm::vec3(-5.0f, -2.0f, 5.0f), glm::vec3(5.0f, 2.0f, 5.0f), 0.4f);
@@ -377,7 +404,7 @@ int main(int argc, char** argv)
         std::vector<Vertex> windVertex;
         for (WindPoint &w : wind) {
             index++;
-            w.momentum += airhandler.getInfluece(w.position) * delta;
+            w.momentum += airhandler.getInfluece(w.position) * delta * windStrength;
             w.position += w.momentum * delta;
             if (!airhandler.isInfluenced(w.position)) {
                 indiceForClear.push_back(index);
@@ -401,6 +428,144 @@ int main(int argc, char** argv)
         VertexBuffer windBuffer(windVertex.data(), static_cast<uint32_t>(windVertex.size()));
         windBuffer.bind();
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(windVertex.size()));
+
+        //IMGUI Zeug
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+
+        float panelWidth = 300.0f;
+
+        ImGui::SetNextWindowPos(
+            ImVec2(
+                ImGui::GetIO().DisplaySize.x - panelWidth,
+                0
+            )
+        );
+
+        ImGui::SetNextWindowSize(
+            ImVec2(
+                panelWidth,
+                ImGui::GetIO().DisplaySize.y
+            )
+        );
+
+        ImGui::Begin(
+            "Wind Settings",
+            nullptr,
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoTitleBar
+        );
+
+        float tempor;
+
+        if (ImGui::BeginTabBar("SettingsTabs"))
+        {
+            if (ImGui::BeginTabItem("Wind"))
+            {
+                ImGui::Text("Wind settings");
+
+                const char* windTypes[] =
+                {
+                    "Default",
+                    "Nothing",
+                    "Custom",
+                    "zVortex"
+                };
+
+                static int currentWind = 0;
+
+                if (ImGui::Combo("Wind Type", &currentWind, windTypes, IM_ARRAYSIZE(windTypes)))
+                {
+
+                    if (currentWind != 2) {
+                        
+                        airhandler.plannedWinds(
+                            static_cast<WindType>(currentWind)
+                        );
+                        
+                    }
+                }
+
+                if (currentWind == 2) {
+                    if (ImGui::CollapsingHeader("Custom Wind"))
+                    {
+                        ImGui::SliderFloat(
+                            "X",
+                            &customWindDirectionX,
+                            -1.0f,
+                            1.0f
+                        );
+
+                        ImGui::SliderFloat(
+                            "Y",
+                            &customWindDirectionY,
+                            -1.0f,
+                            1.0f
+                        );
+                        ImGui::SliderFloat(
+                            "Z",
+                            &customWindDirectionZ,
+                            -1.0f,
+                            1.0f
+                        );
+                    }
+                    
+                    airhandler.setNumbersWind(glm::vec3(customWindDirectionX, customWindDirectionY, customWindDirectionZ));
+                    ImGui::Separator();
+                }
+
+                ImGui::SliderFloat(
+                    "Strength",
+                    &windStrength,
+                    0.0f,
+                    20.0f
+                );
+               
+                if (windStrength <= 0.0f || currentWind == 1) spawnWindParticles = false;
+
+                ImGui::Checkbox("Spawn Windparticles", &spawnWindParticles);
+
+                ImGui::EndTabItem();
+            }
+
+            if (ImGui::BeginTabItem("Gameobjects"))
+            {
+                ImGui::Text("Gameobject settings");
+
+                if (ImGui::Button("Spawn Cube")) {
+                    objects.push_back(mLoader.addGameObject("Cube"));
+                }
+
+                ImGui::EndTabItem();
+            }
+
+            if (ImGui::BeginTabItem("Simulation"))
+            {
+                ImGui::Text("Simulation settings");
+
+                if (ImGui::Button("Reset Simulation")) {
+                    resetSimulation(objects, wind);
+                    time = 0;
+                }
+
+                ImGui::EndTabItem();
+            }
+
+            ImGui::EndTabBar();
+        }
+        
+
+
+        ImGui::End();
+        
+
+        ImGui::Render();
+
+        ImGui_ImplOpenGL3_RenderDrawData(
+            ImGui::GetDrawData()
+        );
 
         SDL_GL_SwapWindow(window);
 
