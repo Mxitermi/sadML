@@ -53,7 +53,6 @@ struct GameObject {
 		momentum = glm::vec3(0.0f);
 	}
 
-	void destory();
 
 };
 

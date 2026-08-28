@@ -325,11 +325,13 @@ int main(int argc, char** argv)
         {
             index++;
 
-            object.momentum += airhandler.getInfluece(object.position) * delta * windStrength;
+            //object.momentum += airhandler.getInfluece(object.position) * delta * windStrength;
 
             //object.momentum *= (1-0.1 * delta);
 
             object.position += object.momentum * delta;
+
+            airhandler.calculatWindAround(object);
 
             glm::mat4 model = glm::translate(
                 glm::mat4(1.0f),

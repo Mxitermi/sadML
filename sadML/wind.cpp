@@ -98,6 +98,24 @@ glm::vec3 AirHandler::getInfluece(glm::vec3 position) {
 	return wind;
 }
 
+void AirHandler::calculatWindAround(GameObject& obj)
+{
+	for (AirVertex& v : windDirection)
+	{
+		if (v.position.x > obj.position.x - obj.scale.x &&
+			v.position.x < obj.position.x + obj.scale.x &&
+
+			v.position.y > obj.position.y - obj.scale.y &&
+			v.position.y < obj.position.y + obj.scale.y &&
+
+			v.position.z > obj.position.z - obj.scale.z &&
+			v.position.z < obj.position.z + obj.scale.z)
+		{
+			v.direction = -v.direction;
+		}
+	}
+}
+
 bool AirHandler::isInfluenced(glm::vec3 position) {
 	if (position.x > bigPos.x) return false;
 	if (position.y > bigPos.y) return false;

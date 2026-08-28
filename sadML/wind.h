@@ -37,6 +37,7 @@ public:
 	void plannedWinds(WindType type);
 	void setVariablesWind(std::string equX, std::string equY, std::string equZ);
 	void setNumbersWind(glm::vec3 direction);
+	void calculatWindAround(GameObject& obj);
 private:
 	float spacing;
 	int entryPerRow;
