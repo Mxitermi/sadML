@@ -135,8 +135,9 @@ int main(int argc, char** argv)
     }
     
     //Code
+    float airResolution = 0.1f;
 
-    AirHandler airhandler(glm::vec3(-5.0f), glm::vec3(5.0f), 0.1f); //fehlender support für rechtecke
+    AirHandler airhandler(glm::vec3(-5.0f), glm::vec3(5.0f), airResolution); //fehlender support für rechtecke
     //glm::vec3 influence = airhandler.getInfluece(glm::vec3(2.6f, 2.2f, 2.4f));
 
     //std::cout << "Ist: " << influence.x << " " << influence.y << " " << influence.z;
@@ -169,6 +170,7 @@ int main(int argc, char** argv)
     float customWindDirectionX = 0.0f;
     float customWindDirectionY = 0.0f;
     float customWindDirectionZ = -1.0f;
+    bool displayWindPoints = false;
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -403,11 +405,16 @@ int main(int argc, char** argv)
 
             glm::vec3 newVelcoity = airhandler.getInfluece(w.position);
 
-            if (glm::length(w.velocity+newVelcoity*0.003f * delta) < glm::length(newVelcoity)) {
-                w.velocity += newVelcoity * 0.003f * delta;
-            }
+            w.velocity = airhandler.calculateDragAcceleration(
+                w.velocity,
+                    newVelcoity,
+                    1.225f,  // airDensity
+                    0.01f,  // area
+                    0.47f,  // dragCoef
+                    0.001f    // mass
+                ) * delta;
             
-            w.position += w.velocity * windStrength;
+            w.position += w.velocity * windStrength * delta;
             if (!airhandler.isInfluenced(w.position)) {
                 indiceForClear.push_back(index);
             }
@@ -415,7 +422,7 @@ int main(int argc, char** argv)
                 Vertex v;
                 v.position = w.position;
                 float speed = glm::length(w.velocity);
-                float t = glm::clamp(speed / glm::length(newVelcoity*delta), 0.0f, 1.0f);
+                float t = glm::clamp(speed / glm::length(newVelcoity), 0.0f, 1.0f);
                 v.color = glm::vec4(t, 1.0 - t, 0.0, 1.0);
                 windVertex.push_back(v);
             }
@@ -425,7 +432,14 @@ int main(int argc, char** argv)
             wind.erase(wind.begin() + i);
         indiceForClear.clear();
 
-       
+        if (displayWindPoints) {
+            for (AirVertex d : airhandler.windDirection) {
+                Vertex v;
+                v.position = d.position;
+                v.color = glm::vec4(0.5f, 0.0f, 1.0f, 1.0f);
+                windVertex.push_back(v);
+            }
+        }
 
         shader_points.bind();
         glUniformMatrix4fv(modelViewProjLocationPoints, 1, GL_FALSE, &mvp[0][0]);
@@ -562,12 +576,22 @@ int main(int argc, char** argv)
             if (ImGui::BeginTabItem("Simulation"))
             {
                 ImGui::Text("Simulation settings");
-
+                
                 if (ImGui::Button("Reset Simulation")) {
                     resetSimulation(objects, wind);
                     time = 0;
                 }
 
+                
+
+                if (ImGui::Button("Display Windpoints")) {
+                    displayWindPoints = !displayWindPoints;
+                }
+               
+                ImGui::Text("Simulation constants");
+                ImGui::Separator();
+                ImGui::Text("FPS %.1f", ImGui::GetIO().Framerate);
+                ImGui::Text("Current Air Resolution %.001f", airResolution);
                 ImGui::EndTabItem();
             }
 

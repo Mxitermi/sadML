@@ -2,7 +2,7 @@
 #include "defines.h"
 #include <string>
 struct WindPoint {
-	
+
 	glm::vec3 position;
 	glm::vec3 velocity;
 	glm::vec3 initalposiiton;
@@ -10,6 +10,9 @@ struct WindPoint {
 		position = initalposiiton;
 		velocity = glm::vec3(0.0f);
 	}
+
+	
+
 };
 
 struct AirVertex {
@@ -38,6 +41,13 @@ public:
 	void setVariablesWind(std::string equX, std::string equY, std::string equZ);
 	void setNumbersWind(glm::vec3 direction);
 	void calculatWindAround(GameObject& obj);
+	glm::vec3 calculateDragAcceleration(
+		const glm::vec3& particleVelocity,
+		const glm::vec3& windVelocity,
+		float airDensity,
+		float area,
+		float dragCoef,
+		float mass);
 private:
 	float spacing;
 	int entryPerRow;

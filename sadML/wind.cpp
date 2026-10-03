@@ -426,3 +426,26 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 	}
 
 }
+
+glm::vec3 AirHandler::calculateDragAcceleration(
+	const glm::vec3& particleVelocity,
+	const glm::vec3& windVelocity,
+	float airDensity,
+	float area,
+	float dragCoef,
+	float mass)
+{
+	glm::vec3 relVelocity = particleVelocity - windVelocity;
+	float speed = glm::length(relVelocity);
+
+	if (speed == 0.0f)
+		return glm::vec3(0.0f);
+
+	return -0.5f *
+		airDensity *
+		dragCoef *
+		area *
+		speed *
+		relVelocity /
+		mass;
+}
