@@ -20,7 +20,6 @@
 #pragma comment(lib, "SDL3.lib")
 #pragma comment(lib, "glew32s.lib")
 #pragma comment(lib, "opengl32.lib")
-#pragma comment(lib, "freetype.lib")
 
 #include "vertex_buffer.h"
 #include "defines.h"
@@ -313,8 +312,6 @@ int main(int argc, char** argv)
             camera.update();
         }
         
-       
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 mvp = camera.getViewProj();
@@ -391,8 +388,6 @@ int main(int argc, char** argv)
 
         int currentSecond = static_cast<int>(time);
 
-        
-
         timer += delta;
         if (timer >= 0.1f && spawnWindParticles)
         {
@@ -405,16 +400,22 @@ int main(int argc, char** argv)
         std::vector<Vertex> windVertex;
         for (WindPoint &w : wind) {
             index++;
-            w.momentum += airhandler.getInfluece(w.position) * delta * windStrength;
-            w.position += w.momentum * delta;
+
+            glm::vec3 newVelcoity = airhandler.getInfluece(w.position);
+
+            if (glm::length(w.velocity+newVelcoity*0.003f * delta) < glm::length(newVelcoity)) {
+                w.velocity += newVelcoity * 0.003f * delta;
+            }
+            
+            w.position += w.velocity * windStrength;
             if (!airhandler.isInfluenced(w.position)) {
                 indiceForClear.push_back(index);
             }
             else {
                 Vertex v;
                 v.position = w.position;
-                float speed = glm::length(w.momentum);
-                float t = glm::clamp(speed / 3.5f, 0.0f, 1.0f);
+                float speed = glm::length(w.velocity);
+                float t = glm::clamp(speed / glm::length(newVelcoity*delta), 0.0f, 1.0f);
                 v.color = glm::vec4(t, 1.0 - t, 0.0, 1.0);
                 windVertex.push_back(v);
             }
@@ -572,8 +573,6 @@ int main(int argc, char** argv)
 
             ImGui::EndTabBar();
         }
-        
-
 
         ImGui::End();
         

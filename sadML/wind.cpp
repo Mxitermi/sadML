@@ -188,7 +188,7 @@ std::vector<WindPoint> AirHandler::createWindLayer(glm::vec3 sp, glm::vec3 bp, f
 			WindPoint w;
 			w.position = glm::vec3(x, y, bp.z);
 			w.initalposiiton = w.position;
-			w.momentum = glm::vec3(0.0f);
+			w.velocity = glm::vec3(0.0f);
 
 			wind.push_back(w);
 		}

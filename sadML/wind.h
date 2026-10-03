@@ -4,11 +4,11 @@
 struct WindPoint {
 	
 	glm::vec3 position;
-	glm::vec3 momentum;
+	glm::vec3 velocity;
 	glm::vec3 initalposiiton;
 	void reset() {
 		position = initalposiiton;
-		momentum = glm::vec3(0.0f);
+		velocity = glm::vec3(0.0f);
 	}
 };
 
