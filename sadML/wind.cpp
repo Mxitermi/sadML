@@ -39,6 +39,7 @@ AirHandler::AirHandler(glm::vec3 sp, glm::vec3 bp, float s) {
 				AirVertex a;
 				a.position = glm::vec3(x, y, z);
 				a.direction = glm::vec3(0.0f, 0.0f, -1.0f);
+				a.speed = 10.0f;
 				windDirection.push_back(a);
 			}
 		}
@@ -95,7 +96,7 @@ glm::vec3 AirHandler::getInfluece(glm::vec3 position) {
 	wind = windDirection[indexB].direction * delta + windDirection[indexT].direction * (glm::vec3(spacing) -delta);
 	
 
-	return glm::normalize(wind);
+	return glm::normalize(wind) * (windDirection[indexB].speed * delta + windDirection[indexT].speed * (glm::vec3(spacing) - delta));
 }
 
 void AirHandler::calculatWindAround(GameObject& obj)

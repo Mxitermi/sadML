@@ -18,6 +18,7 @@ struct WindPoint {
 struct AirVertex {
 	glm::vec3 position;
 	glm::vec3 direction;
+	float speed; //no unit "this Airvertex is speed more effected by wind"
 };
 
 enum class WindType
