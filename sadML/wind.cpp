@@ -95,7 +95,7 @@ glm::vec3 AirHandler::getInfluece(glm::vec3 position) {
 	wind = windDirection[indexB].direction * delta + windDirection[indexT].direction * (glm::vec3(spacing) -delta);
 	
 
-	return wind;
+	return glm::normalize(wind);
 }
 
 void AirHandler::calculatWindAround(GameObject& obj)
@@ -154,25 +154,28 @@ void AirHandler::plannedWinds(WindType type) {
 			a.direction.x = 0.0f;
 			a.direction.y = 0.0f;
 			a.direction.z = -1.0f;
+			a.direction = glm::normalize(a.direction);
 		}
 	}else if (type == WindType::Nothing) {
 		for (AirVertex& a : windDirection) {
 			a.direction.x = 0.0f;
 			a.direction.y = 0.0f;
 			a.direction.z = 0.0f;
+			a.direction = glm::normalize(a.direction);
 		}
 	}else if (type == WindType::zVortex) {
 		for (AirVertex& a : windDirection) {
 			a.direction.x = -a.position.y;
 			a.direction.y = a.position.x;
 			a.direction.z = -1.0f;
+			a.direction = glm::normalize(a.direction);
 		}
 	}
 }
 
 void AirHandler::setNumbersWind(glm::vec3 direction) {
 	for (AirVertex& a : windDirection) {
-		a.direction = direction;
+		 a.direction = glm::normalize(direction);
 	}
 }
 
@@ -219,6 +222,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					float pos = a.position.x;
 					if (pos != 0)  a.direction.x /= pos;
 				}
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == 'y') {
@@ -230,6 +234,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					float pos = a.position.y;
 					if (pos != 0)  a.direction.x /= pos;
 				}
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == 'z') {
@@ -241,7 +246,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					float pos = a.position.z;
 					if (pos != 0)  a.direction.x /= pos;
 				}
-
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == '1') {
@@ -250,6 +255,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 				if (stateMinus) a.direction.x -= 1;
 				if (stateMul) a.direction.x *= 1;
 				if (stateDiv) a.direction.x /= 1;
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == '+') {
@@ -294,6 +300,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					float pos = a.position.x;
 					if (pos != 0)  a.direction.y /= pos;
 				}
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == 'y') {
@@ -305,6 +312,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					float pos = a.position.y;
 					if (pos != 0)  a.direction.y /= pos;
 				}
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == 'z') {
@@ -316,6 +324,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					float pos = a.position.z;
 					if (pos != 0)  a.direction.y /= pos;
 				}
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == '1') {
@@ -324,6 +333,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 				if (stateMinus) a.direction.y -= 1;
 				if (stateMul) a.direction.y *= 1;
 				if (stateDiv) a.direction.y /= 1;
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == '+') {
@@ -367,6 +377,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					float pos = a.position.x;
 					if (pos != 0)  a.direction.z /= pos;
 				}
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == 'y') {
@@ -378,6 +389,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					float pos = a.position.y;
 					if (pos != 0)  a.direction.z /= pos;
 				}
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == 'z') {
@@ -389,6 +401,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 					float pos = a.position.z;
 					if (pos != 0)  a.direction.z /= pos;
 				}
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == '1') {
@@ -397,6 +410,7 @@ void AirHandler::setVariablesWind(std::string equX, std::string equY, std::strin
 				if (stateMinus) a.direction.z -= 1;
 				if (stateMul) a.direction.z *= 1;
 				if (stateDiv) a.direction.z /= 1;
+				a.direction = glm::normalize(a.direction);
 			}
 		}
 		else if (c == '+') {

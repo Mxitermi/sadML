@@ -165,7 +165,15 @@ int main(int argc, char** argv)
     bool moveUp = false;
     bool moveDown = false;
 
-    float windStrength = 1.0f;
+    //Constants
+    const float airPressaure = 101.325f; //kPa
+    const float airTemperatur = 59.0f; // Fahrenheit
+    const float airDensity = 1.2250f; // kg/m³
+    const float maxWindSpeed = 56; // m/s
+
+    float windSpeed = 15.5556f; // m/s
+    float simulationSpeed = 0.2f; 
+
     bool spawnWindParticles = true;
     float customWindDirectionX = 0.0f;
     float customWindDirectionY = 0.0f;
@@ -324,7 +332,7 @@ int main(int argc, char** argv)
         {
             index++;
 
-            //object.momentum += airhandler.getInfluece(object.position) * delta * windStrength;
+            //object.momentum += airhandler.getInfluece(object.position) * delta * windSpeed;
 
             //object.momentum *= (1-0.1 * delta);
 
@@ -403,27 +411,28 @@ int main(int argc, char** argv)
         for (WindPoint &w : wind) {
             index++;
 
-            glm::vec3 newVelcoity = airhandler.getInfluece(w.position);
+            w.velocity = airhandler.getInfluece(w.position) * windSpeed;
 
+            /*
+            Erst für Objekte nutzen und nicht für Tracelines
             w.velocity = airhandler.calculateDragAcceleration(
                 w.velocity,
-                    newVelcoity,
-                    1.225f,  // airDensity
+                    newVelcoity * windSpeed,
+                    airDensity,  // airDensity
                     0.01f,  // area
-                    0.47f,  // dragCoef
+                    0.45f,  // dragCoef
                     0.001f    // mass
-                ) * delta;
+                ) * delta;*/
             
-            w.position += w.velocity * windStrength * delta;
+            w.position += w.velocity * delta * simulationSpeed;
             if (!airhandler.isInfluenced(w.position)) {
                 indiceForClear.push_back(index);
             }
             else {
                 Vertex v;
                 v.position = w.position;
-                float speed = glm::length(w.velocity);
-                float t = glm::clamp(speed / glm::length(newVelcoity), 0.0f, 1.0f);
-                v.color = glm::vec4(t, 1.0 - t, 0.0, 1.0);
+                float t = glm::clamp(glm::length(w.velocity) / maxWindSpeed, 0.0f, 1.0f);
+                v.color = glm::vec4(t, 1.0f - t, 0.0f, 1.0f);
                 windVertex.push_back(v);
             }
         }
@@ -549,13 +558,13 @@ int main(int argc, char** argv)
                 }
 
                 ImGui::SliderFloat(
-                    "Strength",
-                    &windStrength,
+                    "Windspeed",
+                    &windSpeed,
                     0.0f,
-                    20.0f
+                    maxWindSpeed
                 );
                
-                if (windStrength <= 0.0f || currentWind == 1) spawnWindParticles = false;
+                if (windSpeed <= 0.0f || currentWind == 1) spawnWindParticles = false;
 
                 ImGui::Checkbox("Spawn Windparticles", &spawnWindParticles);
 
@@ -587,6 +596,16 @@ int main(int argc, char** argv)
                 if (ImGui::Button("Display Windpoints")) {
                     displayWindPoints = !displayWindPoints;
                 }
+
+
+                ImGui::SliderFloat(
+                    "Simulation speed",
+                    &simulationSpeed,
+                    0.0f,
+                    2.0f,
+                    "%.2f",
+                    ImGuiSliderFlags_Logarithmic
+                );
                
                 ImGui::Text("Simulation constants");
                 ImGui::Separator();
