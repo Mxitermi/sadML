@@ -36,7 +36,7 @@ struct GameObject {
 	glm::vec3 rotation;
 	glm::vec3 scale;
 
-	glm::vec3 momentum;
+	glm::vec3 velocity;
 
 	GameObject(Model* m, int i)
 		: model(m),
@@ -45,12 +45,12 @@ struct GameObject {
 		scale(1.0f)
 	{
 		id = i;
-		momentum = glm::vec3(0.0f);
+		velocity = glm::vec3(0.0f);
 	}
 
 	void reset() {
 		position = originalPosition;
-		momentum = glm::vec3(0.0f);
+		velocity = glm::vec3(0.0f);
 	}
 
 

@@ -6,14 +6,13 @@
 #include <string>
 #include <sstream>
 
-std::vector<GameObject> ModelLoader::createGameObjects() {
+std::vector<GameObject> ModelLoader::initializeGameobjects() {
 
     std::vector<GameObject> objects;
 
     for (PathPosition& current : pathForObjToLoad)
     {
         VertexCombo cube = loadObjFromFile(current.path);
-
         models.push_back(
             std::make_unique<Model>(
                 cube.vertices.data(),
@@ -22,15 +21,18 @@ std::vector<GameObject> ModelLoader::createGameObjects() {
                 cube.numIndices
             )
         );
-        current.pos = counter;
-        counter++;
-        Model* model = models.back().get();
+        
 
-        GameObject gameObject(model, current.id);
-        gameObject.position = current.position;
-        gameObject.originalPosition = current.position;
+        if (current.loadOnStart) {
+            current.pos = counter;
+            counter++;
+            Model* model = models.back().get();
+            GameObject gameObject(model, current.id);
+            gameObject.position = current.position;
+            gameObject.originalPosition = current.position;
 
-        objects.push_back(gameObject);
+            objects.push_back(gameObject);
+        }
     }
 
     return objects;
@@ -46,6 +48,7 @@ GameObject ModelLoader::addGameObject(std::string name, glm::vec3 position) {
             nextID++;
             GameObject gameObject(model, nextID);
             gameObject.position = position;
+            gameObject.scale = glm::vec3(1.0f);
             gameObject.originalPosition = position;
 
             return gameObject;
@@ -53,8 +56,10 @@ GameObject ModelLoader::addGameObject(std::string name, glm::vec3 position) {
     }
 }
 
-void ModelLoader::addObjectToLoad(const char* path, std::string name, glm::vec3 position, int id) {
-    pathForObjToLoad.push_back(PathPosition(path, position, name, id));
+void ModelLoader::addObjectToLoad(const char* path, std::string name, glm::vec3 position, bool loadOnStart, int id) {
+    if(id == -1) nextID++;
+    pathForObjToLoad.push_back(PathPosition(path, position, name, nextID, 0,loadOnStart));
+
 }
 
 VertexCombo ModelLoader::loadObjFromFile(const char* path) {

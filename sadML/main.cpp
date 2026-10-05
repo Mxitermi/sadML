@@ -29,7 +29,6 @@
 #include <cmath>
 #include "camera.h";
 #include "model_loader.h"
-uint64_t ModelLoader::nextID = 1000;
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -90,17 +89,16 @@ int main(int argc, char** argv)
 
     ModelLoader mLoader;
     
-    mLoader.addObjectToLoad("models/cube.obj", "Cube", glm::vec3(0.0f, 0.0f, 6.0f));
+    mLoader.addObjectToLoad("models/cube.obj", "Cube", glm::vec3(0.0f, 0.0f, 4.0f), false);
 
 
-    std::vector<GameObject> objects = mLoader.createGameObjects();
-    
+    std::vector<GameObject> objects = mLoader.initializeGameobjects();
+
     std::cout << "Objects: " << objects.size() << "\n";
 
     Shader shader("basic.vertex", "basic.frag");
     Shader shader_lines("basic_lines.vertex", "basic.frag");
     Shader shader_points("basic_points.vertex", "basic.frag");
-    shader.bind();
 
     uint64_t perfCounterFrequency = SDL_GetPerformanceFrequency();
     uint64_t lastCounter = SDL_GetPerformanceCounter();
@@ -332,13 +330,21 @@ int main(int argc, char** argv)
         {
             index++;
 
-            //object.momentum += airhandler.getInfluece(object.position) * delta * windSpeed;
+            /*wobject.velocity = airhandler.calculateDragAcceleration(
+                w.velocity,
+                newVelcoity * windSpeed,
+                airDensity,  // airDensity
+                0.01f,  // area
+                0.45f,  // dragCoef
+                0.001f    // mass
+            ) * delta;*/
 
+            glm::vec3 newVelocity = airhandler.getInfluece(object.position) * windSpeed;
+            object.velocity = airhandler.calculateDragAcceleration(object.velocity, newVelocity, airDensity, 1, 1.05f, 1) * delta;
             //object.momentum *= (1-0.1 * delta);
+            
 
-            object.position += object.momentum * delta;
-
-            airhandler.calculatWindAround(object);
+            object.position += object.velocity * delta * simulationSpeed;
 
             glm::mat4 model = glm::translate(
                 glm::mat4(1.0f),
@@ -376,6 +382,7 @@ int main(int argc, char** argv)
                 indiceForClear.push_back(index);
             }
         }
+        
 
         std::sort(indiceForClear.begin(), indiceForClear.end(), std::greater<int>());
         for (auto i : indiceForClear)
@@ -576,7 +583,7 @@ int main(int argc, char** argv)
                 ImGui::Text("Gameobject settings");
 
                 if (ImGui::Button("Spawn Cube")) {
-                    objects.push_back(mLoader.addGameObject("Cube", glm::vec3(0.0f)));
+                    objects.push_back(mLoader.addGameObject("Cube", glm::vec3(2.0f)));
                 }
 
                 ImGui::EndTabItem();
