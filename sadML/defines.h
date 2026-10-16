@@ -38,6 +38,9 @@ struct GameObject {
 
 	glm::vec3 velocity;
 
+	bool influencedByWind;
+	float weight; // kg
+
 	GameObject(Model* m, int i)
 		: model(m),
 		position(0.0f),

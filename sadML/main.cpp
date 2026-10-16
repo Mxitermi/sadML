@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 
     SDL_GL_SetSwapInterval(1);
     
-    window = SDL_CreateWindow("SAD", 1100, 600, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("SAD", 1600, 900, SDL_WINDOW_OPENGL);
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
 
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
     
     std::cout << "Version of local OpenGL: " << glGetString(GL_VERSION) << std::endl;
 
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, 1200, 900);
 
     IMGUI_CHECKVERSION();
 
@@ -89,14 +89,16 @@ int main(int argc, char** argv)
 
     ModelLoader mLoader;
     
-    mLoader.addObjectToLoad("models/cube.obj", "Cube", glm::vec3(0.0f, 0.0f, 4.0f), false);
+    mLoader.addObjectToLoad("models/cube.obj", "Cube", glm::vec3(0.0f, 0.0f, 2.0f), true);
 
 
     std::vector<GameObject> objects = mLoader.initializeGameobjects();
+    objects[0].rotation.x = 45;
+    objects[0].influencedByWind = false;
 
     std::cout << "Objects: " << objects.size() << "\n";
 
-    Shader shader("basic.vertex", "basic.frag");
+    Shader shader("basic.vertex", "basic_object.frag");
     Shader shader_lines("basic_lines.vertex", "basic.frag");
     Shader shader_points("basic_points.vertex", "basic.frag");
 
@@ -108,7 +110,7 @@ int main(int argc, char** argv)
     int modelViewProjLocation = glGetUniformLocation(shader.getShaderId(), "u_modelViewProj");
     int modelViewProjLocationPoints = glGetUniformLocation(shader_points.getShaderId(), "u_modelViewProj");
     
-    Camera camera(90.0f, 800.0f, 600.0f);
+    Camera camera(90.0f, 1200.0f, 900.0f);
     camera.translate(glm::vec3(0.0f, 0.0f, 5.0f));
     camera.update();
     
@@ -132,14 +134,14 @@ int main(int argc, char** argv)
         }
     }
     
-    //Code
-    float airResolution = 0.1f;
+    
+    
+
+    float airResolution = 1.0f;
+
+    //Air Code
 
     AirHandler airhandler(glm::vec3(-5.0f), glm::vec3(5.0f), airResolution); //fehlender support für rechtecke
-    //glm::vec3 influence = airhandler.getInfluece(glm::vec3(2.6f, 2.2f, 2.4f));
-
-    //std::cout << "Ist: " << influence.x << " " << influence.y << " " << influence.z;
-    //glm::vec3 influenc = airhandler.getInfluece(glm::vec3(-5.0f));
 
     std::vector<WindPoint> wind = airhandler.createWindLayer(glm::vec3(-5, -2, 5), glm::vec3(5, 2, 5), 0.4f);
 
@@ -171,6 +173,7 @@ int main(int argc, char** argv)
 
     float windSpeed = 15.5556f; // m/s
     float simulationSpeed = 0.2f; 
+    float windParticleSpawnTime = 0.07; // s
 
     bool spawnWindParticles = true;
     float customWindDirectionX = 0.0f;
@@ -339,8 +342,11 @@ int main(int argc, char** argv)
                 0.001f    // mass
             ) * delta;*/
 
-            glm::vec3 newVelocity = airhandler.getInfluece(object.position) * windSpeed;
-            object.velocity = airhandler.calculateDragAcceleration(object.velocity, newVelocity, airDensity, 1, 1.05f, 1) * delta;
+            if (object.influencedByWind) {
+                glm::vec3 newVelocity = airhandler.getInfluece(object.position) * windSpeed;
+                object.velocity = airhandler.calculateDragAcceleration(object.velocity, newVelocity, airDensity, 1, 1.05f, 1) * delta;
+            }
+            
             //object.momentum *= (1-0.1 * delta);
             
 
@@ -406,7 +412,7 @@ int main(int argc, char** argv)
         int currentSecond = static_cast<int>(time);
 
         timer += delta;
-        if (timer >= 0.1f && spawnWindParticles)
+        if (timer >= windParticleSpawnTime/simulationSpeed && spawnWindParticles)
         {
             timer = 0.0f;
             std::vector<WindPoint> newWindLayer = airhandler.createWindLayer(glm::vec3(-5.0f, -2.0f, 5.0f), glm::vec3(5.0f, 2.0f, 5.0f), 0.4f);
@@ -468,7 +474,7 @@ int main(int argc, char** argv)
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        float panelWidth = 300.0f;
+        float panelWidth = 400.0f;
 
         ImGui::SetNextWindowPos(
             ImVec2(
@@ -574,6 +580,13 @@ int main(int argc, char** argv)
                 if (windSpeed <= 0.0f || currentWind == 1) spawnWindParticles = false;
 
                 ImGui::Checkbox("Spawn Windparticles", &spawnWindParticles);
+
+                ImGui::SliderFloat(
+                    "Windparticles Spawntime",
+                    &windParticleSpawnTime,
+                    0.0f,
+                    0.3f
+                );
 
                 ImGui::EndTabItem();
             }

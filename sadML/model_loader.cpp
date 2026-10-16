@@ -30,6 +30,8 @@ std::vector<GameObject> ModelLoader::initializeGameobjects() {
             GameObject gameObject(model, current.id);
             gameObject.position = current.position;
             gameObject.originalPosition = current.position;
+            gameObject.influencedByWind = false;
+            gameObject.weight = 1.0f;
 
             objects.push_back(gameObject);
         }
