@@ -89,11 +89,11 @@ int main(int argc, char** argv)
 
     ModelLoader mLoader;
     
-    mLoader.addObjectToLoad("models/cube.obj", "Cube", glm::vec3(0.0f, 0.0f, 2.0f), true);
+    mLoader.addObjectToLoad("models/cube.obj", "Cube", glm::vec3(0.0f, 0.0f, 0.0f), true);
 
 
     std::vector<GameObject> objects = mLoader.initializeGameobjects();
-    objects[0].rotation.x = 45;
+    
     objects[0].influencedByWind = false;
 
     std::cout << "Objects: " << objects.size() << "\n";
@@ -147,12 +147,26 @@ int main(int argc, char** argv)
 
 
     std::vector<Vertex> windBoundingBox = airhandler.getWindBoundingBoxVertecies();
+
+    //normals for debuggin
+    windBoundingBox.insert(windBoundingBox.end(), mLoader.normalsFirst.begin(), mLoader.normalsFirst.end());
+
     VertexBuffer vWindBindingBoxBuffer(
         windBoundingBox.data(),
         static_cast<uint32_t>(windBoundingBox.size())
     );
     std::vector<uint32_t> windIndices = airhandler.getWindBoundingBoxIndices();
+
+
+    //normal indiciesm
+    int startIndi = windBoundingBox.size() - mLoader.normalsFirst.size();
+    for (int i = 0; i < mLoader.normalsFirst.size() + 12; i += 2) {
+       
+        windIndices.push_back(startIndi +i);
+        windIndices.push_back(startIndi + i + 1);
+    }
     IndexBuffer iWindBuffer(windIndices.data(), static_cast<uint32_t>(windIndices.size()), sizeof(uint32_t));
+
     //Code end
 
     std::vector<int> indiceForClear;

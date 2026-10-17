@@ -77,7 +77,7 @@ VertexCombo ModelLoader::loadObjFromFile(const char* path) {
     int n1, n2, n3;
 
     VertexCombo combo;
-    std::vector<Vertex> normal;
+    std::vector<glm::vec3> normals;
 
     while (std::getline(infile, line)) {
 
@@ -88,16 +88,24 @@ VertexCombo ModelLoader::loadObjFromFile(const char* path) {
 
             combo.addVertex(x, y, z);
         }
-        
+
+        if (type == "vn") {
+            ss >> x >> y >> z;
+ 
+            normals.push_back(glm::vec3(x, y, z));
+        }
 
         if (type == "f") {
             ss >> i1 >> b >> t >> b >> n1 >> i2 >> b >> t >> b >> n2 >> i3 >> b >> t >> b >> n3;
             combo.addIndice(i1 - 1, i2 - 1, i3 - 1);
+            combo.changeNormal(i1 - 1, normals[n1 - 1]);
+            combo.changeNormal(i2 - 1, normals[n2 - 1]);
+            combo.changeNormal(i3 - 1, normals[n3 - 1]);
         }
     }
-    
-    
-    
+    combo.normalize();
+    normalsFirst = combo.getNormals();
+
     return combo;
 }
 

@@ -13,6 +13,7 @@ public:
 	void addObjectToLoad(const char* path,std::string name, glm::vec3 position = glm::vec3(0.0f), bool loadOnStart = true, int id = -1);
 	GameObject* getObjWithId(uint64_t cId, std::vector<GameObject>& objects);
 	GameObject addGameObject(std::string name, glm::vec3 position);
+	std::vector<Vertex> normalsFirst;
 protected:
 	struct PathPosition {
 		const char* path;
