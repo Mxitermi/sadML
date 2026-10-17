@@ -18,7 +18,7 @@ struct Model {
 	VertexBuffer vBuffer;
 	IndexBuffer iBuffer;
 	uint32_t numIndices;
-	Triangle3* faces;
+	std::vector <Triangle3> faces;
 
 	Model(
 		Vertex* vertices,
@@ -30,17 +30,14 @@ struct Model {
 		iBuffer(indices, numIndices, sizeof(uint32_t)),
 		numIndices(numIndices)
 	{
-		std::vector<Triangle3> facesVec;
 		Triangle3 triangle;
 		for (int i = 2; i < numIndices; i += 3) {
 			triangle.a = vertices[indices[i - 2]].position;
 			triangle.b = vertices[indices[i - 1]].position;
 			triangle.c = vertices[indices[i]].position;
 			triangle.normal = glm::normalize(vertices[indices[i - 2]].normal + vertices[indices[i - 1]].normal + vertices[indices[i]].normal);
-			facesVec.push_back(triangle);
+			faces.push_back(triangle);
 		}
-		std::cout << "size " << facesVec.size() << "\n";
-		faces = facesVec.data();
 	}
 
 };

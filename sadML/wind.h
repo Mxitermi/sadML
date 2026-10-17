@@ -1,6 +1,7 @@
 #pragma once
 #include "defines.h"
 #include <string>
+#include <optional>
 struct WindPoint {
 
 	glm::vec3 position;
@@ -18,6 +19,7 @@ struct WindPoint {
 struct AirVertex {
 	glm::vec3 position;
 	glm::vec3 direction;
+	glm::vec4 color;
 	float speed; //no unit "this Airvertex is speed more effected by wind"
 };
 
@@ -32,6 +34,7 @@ enum class WindType
 class AirHandler {
 public:
 	AirHandler(glm::vec3 smallPos, glm::vec3 bigPos, float spacing);
+	void updateWindField(GameObject& obj);
 	glm::vec3 getInfluece(glm::vec3 position);
 	std::vector<AirVertex> windDirection;
 	bool isInfluenced(glm::vec3 position);
@@ -58,4 +61,7 @@ private:
 	std::vector<uint32_t> windBoundingBoxIndices;
 	void addVertex(float x, float y, float z);
 	void addIndice(float i, float j);
+	bool ray_intersects_triangle(const glm::vec3& ray_origin,
+		const glm::vec3& ray_vector,
+		const Triangle3& triangle);
 };

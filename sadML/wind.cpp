@@ -3,7 +3,6 @@
 #include <cmath>
 
 
-
 AirHandler::AirHandler(glm::vec3 sp, glm::vec3 bp, float s) {
 
 	smallPos = sp;
@@ -40,6 +39,7 @@ AirHandler::AirHandler(glm::vec3 sp, glm::vec3 bp, float s) {
 				a.position = glm::vec3(x, y, z);
 				a.direction = glm::vec3(0.0f, 0.0f, -1.0f);
 				a.speed = 1.0f;
+				a.color = glm::vec4(0.5, 0.0, 0.5, 1.0);
 				windDirection.push_back(a);
 			}
 		}
@@ -115,6 +115,63 @@ void AirHandler::calculatWindAround(GameObject& obj)
 			v.direction = -v.direction;
 		}
 	}
+}
+
+void AirHandler::updateWindField(GameObject& obj) {
+	std::vector <Triangle3> faces = obj.model->faces;
+
+	for (AirVertex& vertex : windDirection) {
+		for (int i = 0; i < faces.size(); i++) {
+			
+			if (ray_intersects_triangle(vertex.position, vertex.direction, faces[i])) { 
+				
+				vertex.color = glm::vec4(0.0, 1.0, 0.0, 1.0);
+				break;
+			};
+		}
+	}
+}
+
+bool AirHandler::ray_intersects_triangle(const glm::vec3& ray_origin,
+	const glm::vec3& ray_vector,
+	const Triangle3& triangle)
+{
+	using namespace glm;
+	constexpr float epsilon = std::numeric_limits<float>::epsilon();
+
+	vec3 edge1 = triangle.b - triangle.a;
+	vec3 edge2 = triangle.c - triangle.a;
+
+	// Backface culling, assuming CCW-wound triangles.
+	const vec3 normal = cross(edge1, edge2); // No need to normalize
+	if (dot(normal, ray_vector) > 0) return false;
+
+	vec3 ray_cross_e2 = cross(ray_vector, edge2);
+	float det = dot(edge1, ray_cross_e2);
+
+	if (abs(det) < epsilon) return false; // Ray is parallel to triangle
+
+	float inv_det = 1.0 / det;
+	vec3 s = ray_origin - triangle.a;
+	float u = inv_det * dot(s, ray_cross_e2);
+
+	if (u < -epsilon || u - 1 > epsilon) return false; // Ray passes outside edge2's bounds
+
+	vec3 s_cross_e1 = cross(s, edge1);
+	float v = inv_det * dot(ray_vector, s_cross_e1);
+
+	if (v < -epsilon || u + v - 1 > epsilon) return false; // Ray passes outside edge1's bounds
+	// The ray line intersects with the triangle.
+	// We compute t to find where on the ray the intersection is.
+
+	float t = inv_det * dot(edge2, s_cross_e1);
+
+	if (t > epsilon) // Ray intersection
+	{
+		return true;
+	}
+	else // This means that there is a line intersection but not a ray intersection.
+		return false;
 }
 
 bool AirHandler::isInfluenced(glm::vec3 position) {

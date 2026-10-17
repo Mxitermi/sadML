@@ -345,6 +345,7 @@ int main(int argc, char** argv)
         shader.bind();
         for (GameObject& object : objects)
         {
+            airhandler.updateWindField(object);
             index++;
 
             /*wobject.velocity = airhandler.calculateDragAcceleration(
@@ -355,6 +356,8 @@ int main(int argc, char** argv)
                 0.45f,  // dragCoef
                 0.001f    // mass
             ) * delta;*/
+
+            
 
             if (object.influencedByWind) {
                 glm::vec3 newVelocity = airhandler.getInfluece(object.position) * windSpeed;
@@ -396,7 +399,7 @@ int main(int argc, char** argv)
             object.model->vBuffer.bind();
             object.model->iBuffer.bind();
 
-            glDrawElements(GL_TRIANGLES, object.model->numIndices, GL_UNSIGNED_INT, 0);
+           // glDrawElements(GL_TRIANGLES, object.model->numIndices, GL_UNSIGNED_INT, 0);
 
             if (!airhandler.isInfluenced(object.position)) {
                 indiceForClear.push_back(index);
@@ -472,7 +475,7 @@ int main(int argc, char** argv)
             for (AirVertex d : airhandler.windDirection) {
                 Vertex v;
                 v.position = d.position;
-                v.color = glm::vec4(0.5f, 0.0f, 1.0f, 1.0f);
+                v.color = d.color;
                 windVertex.push_back(v);
             }
         }
@@ -535,9 +538,7 @@ int main(int argc, char** argv)
 
                     if (currentWind != 2) {
                         
-                        airhandler.plannedWinds(
-                            static_cast<WindType>(currentWind)
-                        );
+                     //   airhandler.plannedWinds(static_cast<WindType>(currentWind));
                         
                     }
                 }
