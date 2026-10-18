@@ -134,16 +134,14 @@ int main(int argc, char** argv)
         }
     }
     
-    
-    
 
     float airResolution = 1.0f;
 
     //Air Code
 
-    AirHandler airhandler(glm::vec3(-5.0f), glm::vec3(5.0f), airResolution); //fehlender support für rechtecke
+    AirHandler airhandler(glm::vec3(-3.0f), glm::vec3(3.0f), airResolution); //fehlender support für rechtecke
 
-    std::vector<WindPoint> wind = airhandler.createWindLayer(glm::vec3(-5, -2, 5), glm::vec3(5, 2, 5), 0.4f);
+    std::vector<WindPoint> wind = airhandler.createWindLayer(glm::vec3(-3, -2, 3), glm::vec3(3, 2, 3), 0.4f);
 
 
     std::vector<Vertex> windBoundingBox = airhandler.getWindBoundingBoxVertecies();
@@ -399,7 +397,7 @@ int main(int argc, char** argv)
             object.model->vBuffer.bind();
             object.model->iBuffer.bind();
 
-           // glDrawElements(GL_TRIANGLES, object.model->numIndices, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, object.model->numIndices, GL_UNSIGNED_INT, 0);
 
             if (!airhandler.isInfluenced(object.position)) {
                 indiceForClear.push_back(index);
@@ -432,7 +430,7 @@ int main(int argc, char** argv)
         if (timer >= windParticleSpawnTime/simulationSpeed && spawnWindParticles)
         {
             timer = 0.0f;
-            std::vector<WindPoint> newWindLayer = airhandler.createWindLayer(glm::vec3(-5.0f, -2.0f, 5.0f), glm::vec3(5.0f, 2.0f, 5.0f), 0.4f);
+            std::vector<WindPoint> newWindLayer = airhandler.createWindLayer(glm::vec3(-3.0f, -2.0f, 3.0f), glm::vec3(3.0f, 2.0f, 3.0f), 0.4f);
             wind.insert(wind.end(), newWindLayer.begin(), newWindLayer.end());
 
         }
@@ -538,7 +536,7 @@ int main(int argc, char** argv)
 
                     if (currentWind != 2) {
                         
-                     //   airhandler.plannedWinds(static_cast<WindType>(currentWind));
+                        airhandler.plannedWinds(static_cast<WindType>(currentWind));
                         
                     }
                 }

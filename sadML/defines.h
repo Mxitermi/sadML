@@ -11,7 +11,8 @@ struct Triangle3 {
 	glm::vec3 a;
 	glm::vec3 b;
 	glm::vec3 c;
-	glm::vec3 normal;
+	glm::vec3 vNormal; //avreage Vertex Normal
+	glm::vec3 fNormal; //real face normal
 };
 
 struct Model {
@@ -35,7 +36,8 @@ struct Model {
 			triangle.a = vertices[indices[i - 2]].position;
 			triangle.b = vertices[indices[i - 1]].position;
 			triangle.c = vertices[indices[i]].position;
-			triangle.normal = glm::normalize(vertices[indices[i - 2]].normal + vertices[indices[i - 1]].normal + vertices[indices[i]].normal);
+			triangle.fNormal = glm::cross(triangle.b - triangle.a, triangle.c - triangle.a);
+			triangle.vNormal = glm::normalize(vertices[indices[i - 2]].normal + vertices[indices[i - 1]].normal + vertices[indices[i]].normal);
 			faces.push_back(triangle);
 		}
 	}

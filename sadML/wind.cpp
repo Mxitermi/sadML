@@ -1,7 +1,8 @@
 #include "wind.h"
 #include <iostream>
 #include <cmath>
-
+#include <random>
+#include <ctime>
 
 AirHandler::AirHandler(glm::vec3 sp, glm::vec3 bp, float s) {
 
@@ -30,7 +31,7 @@ AirHandler::AirHandler(glm::vec3 sp, glm::vec3 bp, float s) {
 	addIndice(4, 5);
 	addIndice(4, 7);
 	addIndice(4, 3);
-
+	srand((unsigned)time(0));
 	for (float z = smallPos.z; z <= bigPos.z + spacing; z += spacing) {
 		entryPerRow++;
 		for (float y = smallPos.y; y <= bigPos.y + spacing; y += spacing) {
@@ -40,6 +41,7 @@ AirHandler::AirHandler(glm::vec3 sp, glm::vec3 bp, float s) {
 				a.direction = glm::vec3(0.0f, 0.0f, -1.0f);
 				a.speed = 1.0f;
 				a.color = glm::vec4(0.5, 0.0, 0.5, 1.0);
+				a.objface = false;
 				windDirection.push_back(a);
 			}
 		}
@@ -90,10 +92,25 @@ glm::vec3 AirHandler::getInfluece(glm::vec3 position) {
 	int indexB = iXB + entryPerRow * iYB + entryPerRow * entryPerRow * iZB;
 	int indexT = iXT + entryPerRow * iYT + entryPerRow * entryPerRow * iZT;
 
+	float threshold = 0.1 * spacing;
 
 	glm::vec3 wind;
 	glm::vec3 delta = glm::vec3(deltaX, deltaY, deltaZ);
 	delta = delta / spacing;
+
+	if (windDirection[indexB].objface) { //hinzufügen für nicht nur z sondern für alle 3 Achsen
+		if(deltaZ < threshold)
+			return glm::normalize(windDirection[indexB].direction) * windDirection[indexB].speed;
+		else 
+			return glm::normalize(windDirection[indexT].direction) * windDirection[indexT].speed;
+	}
+	if (windDirection[indexT].objface) {
+		if (deltaZ > threshold)
+			return glm::normalize(windDirection[indexB].direction) * windDirection[indexB].speed;
+		else
+			return glm::normalize(windDirection[indexT].direction) * windDirection[indexT].speed;
+	}
+	
 	wind = windDirection[indexB].direction * delta + windDirection[indexT].direction * (glm::vec3(1.0f) -delta);
 
 	return glm::normalize(wind) * (windDirection[indexB].speed * delta + windDirection[indexT].speed * (glm::vec3(1.0f) - delta));
@@ -121,20 +138,22 @@ void AirHandler::updateWindField(GameObject& obj) {
 	std::vector <Triangle3> faces = obj.model->faces;
 
 	for (AirVertex& vertex : windDirection) {
+		float best = 10000;
 		for (int i = 0; i < faces.size(); i++) {
-			
-			if (ray_intersects_triangle(vertex.position, vertex.direction, faces[i])) { 
-				
+			float temp = ray_intersects_triangle(vertex.position, vertex.direction, faces[i], spacing);
+			if (temp != -1.0 && temp < best) {
+				best = temp;
+				glm::vec3 a = faces[i].vNormal;
+				glm::vec3 n = faces[i].fNormal;
+				vertex.direction = a - glm::dot(a, n) / glm::dot(n, n) * n;
+				vertex.objface = true;
 				vertex.color = glm::vec4(0.0, 1.0, 0.0, 1.0);
-				break;
 			};
 		}
 	}
 }
 
-bool AirHandler::ray_intersects_triangle(const glm::vec3& ray_origin,
-	const glm::vec3& ray_vector,
-	const Triangle3& triangle)
+float AirHandler::ray_intersects_triangle(const glm::vec3& ray_origin,const glm::vec3& ray_vector,const Triangle3& triangle, const float threshold)
 {
 	using namespace glm;
 	constexpr float epsilon = std::numeric_limits<float>::epsilon();
@@ -144,34 +163,34 @@ bool AirHandler::ray_intersects_triangle(const glm::vec3& ray_origin,
 
 	// Backface culling, assuming CCW-wound triangles.
 	const vec3 normal = cross(edge1, edge2); // No need to normalize
-	if (dot(normal, ray_vector) > 0) return false;
+	if (dot(normal, ray_vector) > 0) return  -1.0f;
 
 	vec3 ray_cross_e2 = cross(ray_vector, edge2);
 	float det = dot(edge1, ray_cross_e2);
 
-	if (abs(det) < epsilon) return false; // Ray is parallel to triangle
+	if (abs(det) < epsilon) return  -1.0f; // Ray is parallel to triangle
 
 	float inv_det = 1.0 / det;
 	vec3 s = ray_origin - triangle.a;
 	float u = inv_det * dot(s, ray_cross_e2);
 
-	if (u < -epsilon || u - 1 > epsilon) return false; // Ray passes outside edge2's bounds
+	if (u < -epsilon || u - 1 > epsilon) return  -1.0f; // Ray passes outside edge2's bounds
 
 	vec3 s_cross_e1 = cross(s, edge1);
 	float v = inv_det * dot(ray_vector, s_cross_e1);
 
-	if (v < -epsilon || u + v - 1 > epsilon) return false; // Ray passes outside edge1's bounds
+	if (v < -epsilon || u + v - 1 > epsilon) return -1.0f; // Ray passes outside edge1's bounds
 	// The ray line intersects with the triangle.
 	// We compute t to find where on the ray the intersection is.
 
 	float t = inv_det * dot(edge2, s_cross_e1);
 
-	if (t > epsilon) // Ray intersection
+	if (t < threshold && t > epsilon - 1) // Ray intersection
 	{
-		return true;
+		return t;
 	}
 	else // This means that there is a line intersection but not a ray intersection.
-		return false;
+		return  -1.0f;
 }
 
 bool AirHandler::isInfluenced(glm::vec3 position) {
@@ -240,6 +259,7 @@ void AirHandler::setNumbersWind(glm::vec3 direction) {
 
 std::vector<WindPoint> AirHandler::createWindLayer(glm::vec3 sp, glm::vec3 bp, float windspacing)
 {
+	
 	std::vector<WindPoint> wind;
 
 	for (float y = sp.y; y <= bp.y; y += windspacing)
@@ -247,7 +267,15 @@ std::vector<WindPoint> AirHandler::createWindLayer(glm::vec3 sp, glm::vec3 bp, f
 		for (float x = sp.x; x <= bp.x; x += windspacing)
 		{
 			WindPoint w;
-			w.position = glm::vec3(x, y, bp.z);
+
+			
+
+
+			float noise = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 2*windspacing));
+			noise -= windspacing;
+
+
+			w.position = glm::vec3(x + noise, y + noise, bp.z);
 			w.initalposiiton = w.position;
 			w.velocity = glm::vec3(0.0f);
 
