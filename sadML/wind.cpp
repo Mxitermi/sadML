@@ -98,18 +98,6 @@ glm::vec3 AirHandler::getInfluece(glm::vec3 position) {
 	glm::vec3 delta = glm::vec3(deltaX, deltaY, deltaZ);
 	delta = delta / spacing;
 
-	if (windDirection[indexB].objface) { //hinzufügen für nicht nur z sondern für alle 3 Achsen
-		if(deltaZ < threshold)
-			return glm::normalize(windDirection[indexB].direction) * windDirection[indexB].speed;
-		else 
-			return glm::normalize(windDirection[indexT].direction) * windDirection[indexT].speed;
-	}
-	if (windDirection[indexT].objface) {
-		if (deltaZ > threshold)
-			return glm::normalize(windDirection[indexB].direction) * windDirection[indexB].speed;
-		else
-			return glm::normalize(windDirection[indexT].direction) * windDirection[indexT].speed;
-	}
 	
 	wind = windDirection[indexB].direction * delta + windDirection[indexT].direction * (glm::vec3(1.0f) -delta);
 
@@ -143,9 +131,22 @@ void AirHandler::updateWindField(GameObject& obj) {
 			float temp = ray_intersects_triangle(vertex.position, vertex.direction, faces[i], spacing);
 			if (temp != -1.0 && temp < best) {
 				best = temp;
-				glm::vec3 a = faces[i].vNormal;
+				glm::vec3 a = vertex.direction;
 				glm::vec3 n = faces[i].fNormal;
-				vertex.direction = a - glm::dot(a, n) / glm::dot(n, n) * n;
+
+				float n2 = glm::dot(n, n);
+
+				if (n2 > 1e-8f) {
+					glm::vec3 projected = a - glm::dot(a, n) / n2 * n;
+
+					if (glm::dot(a, projected) < 1e-8f) {
+						a = faces[i].vNormal;
+						vertex.direction = glm::normalize(a - glm::dot(a, n) / n2 * n);
+					}
+					else {
+						vertex.direction = glm::normalize(projected);
+					}
+				}
 				vertex.objface = true;
 				vertex.color = glm::vec4(0.0, 1.0, 0.0, 1.0);
 			};
@@ -272,10 +273,11 @@ std::vector<WindPoint> AirHandler::createWindLayer(glm::vec3 sp, glm::vec3 bp, f
 
 
 			float noise = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 2*windspacing));
+			float noise2 = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 2 * windspacing));
 			noise -= windspacing;
+			noise2 -= windspacing;
 
-
-			w.position = glm::vec3(x + noise, y + noise, bp.z);
+			w.position = glm::vec3(x + noise, y + noise2, bp.z);
 			w.initalposiiton = w.position;
 			w.velocity = glm::vec3(0.0f);
 
