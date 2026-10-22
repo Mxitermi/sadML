@@ -98,6 +98,14 @@ glm::vec3 AirHandler::getInfluece(glm::vec3 position) {
 	glm::vec3 delta = glm::vec3(deltaX, deltaY, deltaZ);
 	delta = delta / spacing;
 
+	if (windDirection[indexB].objface && (deltaX < threshold || deltaY < threshold || deltaZ < threshold)) {
+		return glm::normalize(windDirection[indexB].direction);
+	}
+
+
+	if (windDirection[indexT].objface) return glm::normalize(windDirection[indexB].direction);
+	if (windDirection[indexB].objface) return glm::normalize(windDirection[indexT].direction);
+
 	
 	wind = windDirection[indexB].direction * delta + windDirection[indexT].direction * (glm::vec3(1.0f) -delta);
 
