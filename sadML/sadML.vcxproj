@@ -163,7 +163,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model_loader.cpp" />
     <ClCompile Include="shader.cpp" />
-    <ClCompile Include="wind.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -172,7 +171,6 @@
     <ClInclude Include="shader.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="vertex_buffer.h" />
-    <ClInclude Include="wind.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="basic.frag" />

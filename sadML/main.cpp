@@ -32,20 +32,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include "wind.h"
 #include <algorithm>
-
-constexpr float PI = 3.14159265358979323846f / 2;
-
-void resetSimulation(std::vector<GameObject>& objects, std::vector<WindPoint>& wind) {
-    for (GameObject& obj : objects) {
-        obj.reset();
-    }
-    for (WindPoint& w : wind) {
-        w.reset();
-    }
-}
-
 int main(int argc, char** argv)
 {
 
@@ -81,8 +68,6 @@ int main(int argc, char** argv)
     ImGui::CreateContext();
 
     ImGuiIO& io = ImGui::GetIO();
-
-  
 
     ImGui_ImplSDL3_InitForOpenGL(window, glContext);
     ImGui_ImplOpenGL3_Init("#version 330");
@@ -133,42 +118,7 @@ int main(int argc, char** argv)
             camera.update();
         }
     }
-    
-
-    float airResolution = 1.0f;
-
-    //Air Code
-
-    AirHandler airhandler(glm::vec3(-3.0f), glm::vec3(3.0f), airResolution); //fehlender support für rechtecke
-
-    std::vector<WindPoint> wind = airhandler.createWindLayer(glm::vec3(-3, -2, 3), glm::vec3(3, 2, 3), 0.4f);
-
-
-    std::vector<Vertex> windBoundingBox = airhandler.getWindBoundingBoxVertecies();
-
-    //normals for debuggin
-    windBoundingBox.insert(windBoundingBox.end(), mLoader.normalsFirst.begin(), mLoader.normalsFirst.end());
-
-    VertexBuffer vWindBindingBoxBuffer(
-        windBoundingBox.data(),
-        static_cast<uint32_t>(windBoundingBox.size())
-    );
-    std::vector<uint32_t> windIndices = airhandler.getWindBoundingBoxIndices();
-
-
-    //normal indiciesm
-    int startIndi = windBoundingBox.size() - mLoader.normalsFirst.size();
-    for (int i = 0; i < mLoader.normalsFirst.size() + 12; i += 2) {
-       
-        windIndices.push_back(startIndi +i);
-        windIndices.push_back(startIndi + i + 1);
-    }
-    IndexBuffer iWindBuffer(windIndices.data(), static_cast<uint32_t>(windIndices.size()), sizeof(uint32_t));
-
-    //Code end
-
-    std::vector<int> indiceForClear;
-
+   
     bool enableMovement = false;
     bool moveW = false;
     bool moveA = false;
@@ -177,28 +127,11 @@ int main(int argc, char** argv)
     bool moveUp = false;
     bool moveDown = false;
 
-    //Constants
-    const float airPressaure = 101.325f; //kPa
-    const float airTemperatur = 59.0f; // Fahrenheit
-    const float airDensity = 1.2250f; // kg/m³
-    const float maxWindSpeed = 56; // m/s
-
-    float windSpeed = 15.5556f; // m/s
-    float simulationSpeed = 0.2f; 
-    float windParticleSpawnTime = 0.07; // s
-
-    bool spawnWindParticles = true;
-    float customWindDirectionX = 0.0f;
-    float customWindDirectionY = 0.0f;
-    float customWindDirectionZ = -1.0f;
-    bool displayWindPoints = false;
-
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glEnable(GL_CULL_FACE); //Aufpassen wenn selber dreiecke erstellen wegen windingorder
     glEnable(GL_DEPTH_TEST);
 
-    resetSimulation(objects, wind);
     static float timer = 0.0f;
     float time = 0.0f;
     bool isActive = true;
@@ -268,13 +201,6 @@ int main(int argc, char** argv)
                     camera.setYaw(-90.0f);
                     camera.update();
                     break;
-                case SDLK_RETURN:
-                    resetSimulation(objects, wind);
-                    time = 0.0f;
-                    break;
-                case SDLK_L:
-                    objects.push_back(mLoader.addGameObject("Cube", glm::vec3(0.0f)));
-                    break;
                 case SDLK_P:
                     timer = 0.1f;
                 }
@@ -338,151 +264,8 @@ int main(int argc, char** argv)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 mvp = camera.getViewProj();
-
-        int index = -1;
-        shader.bind();
-        for (GameObject& object : objects)
-        {
-            airhandler.updateWindField(object);
-            index++;
-
-            /*wobject.velocity = airhandler.calculateDragAcceleration(
-                w.velocity,
-                newVelcoity * windSpeed,
-                airDensity,  // airDensity
-                0.01f,  // area
-                0.45f,  // dragCoef
-                0.001f    // mass
-            ) * delta;*/
-
-            
-
-            if (object.influencedByWind) {
-                glm::vec3 newVelocity = airhandler.getInfluece(object.position) * windSpeed;
-                object.velocity = airhandler.calculateDragAcceleration(object.velocity, newVelocity, airDensity, 1, 1.05f, 1) * delta;
-            }
-            
-            //object.momentum *= (1-0.1 * delta);
-            
-
-            object.position += object.velocity * delta * simulationSpeed;
-
-            glm::mat4 model = glm::translate(
-                glm::mat4(1.0f),
-                object.position
-            );
-
-            model = glm::rotate(
-                model,
-                object.rotation.x,
-                glm::vec3(1.0f, 0.0f, 0.0f)
-            );
-
-            model = glm::rotate(
-                model,
-                object.rotation.y,
-                glm::vec3(0.0f, 1.0f, 0.0f)
-            );
-
-            model = glm::rotate(
-                model,
-                object.rotation.z,
-                glm::vec3(0.0f, 0.0f, 1.0f)
-            );
-
-            model = glm::scale(model, object.scale);
-
-            glm::mat4 modelViewProj = mvp * model;
-            glUniformMatrix4fv(modelViewProjLocation, 1, GL_FALSE, &modelViewProj[0][0]);
-            object.model->vBuffer.bind();
-            object.model->iBuffer.bind();
-
-            glDrawElements(GL_TRIANGLES, object.model->numIndices, GL_UNSIGNED_INT, 0);
-
-            if (!airhandler.isInfluenced(object.position)) {
-                indiceForClear.push_back(index);
-            }
-        }
         
-
-        std::sort(indiceForClear.begin(), indiceForClear.end(), std::greater<int>());
-        for (auto i : indiceForClear)
-            objects.erase(objects.begin() + i);
-        indiceForClear.clear();
-
-        shader_lines.bind();
         
-        glUniformMatrix4fv(modelViewProjLocationLines, 1, GL_FALSE, &mvp[0][0]);
-        vWindBindingBoxBuffer.bind();
-        iWindBuffer.bind();
-
-        glDrawElements(GL_LINES, static_cast<uint32_t>(windIndices.size()), GL_UNSIGNED_INT, 0);
-        shader.bind();
-
-        //glUniform4f(cUniformLocation1, sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);
-        //glUniform4f(cUniformLocation2, sinf(time * 0.5f + PI) * sinf(time * 0.5f + PI), sinf(time * 0.5f) * sinf(time * 0.5f), sinf(time * 0.1 + PI) * sinf(time * 0.1 + PI), 1.0f);
-        
-        static int lastSecond = -1;
-
-        int currentSecond = static_cast<int>(time);
-
-        timer += delta;
-        if (timer >= windParticleSpawnTime/simulationSpeed && spawnWindParticles)
-        {
-            timer = 0.0f;
-            std::vector<WindPoint> newWindLayer = airhandler.createWindLayer(glm::vec3(-3.0f, -2.0f, 3.0f), glm::vec3(3.0f, 2.0f, 3.0f), 0.4f);
-            wind.insert(wind.end(), newWindLayer.begin(), newWindLayer.end());
-
-        }
-        index = -1;
-        std::vector<Vertex> windVertex;
-        for (WindPoint &w : wind) {
-            index++;
-
-            w.velocity = airhandler.getInfluece(w.position) * windSpeed;
-
-            /*
-            Erst für Objekte nutzen und nicht für Tracelines
-            w.velocity = airhandler.calculateDragAcceleration(
-                w.velocity,
-                    newVelcoity * windSpeed,
-                    airDensity,  // airDensity
-                    0.01f,  // area
-                    0.45f,  // dragCoef
-                    0.001f    // mass
-                ) * delta;*/
-            
-            w.position += w.velocity * delta * simulationSpeed;
-            if (!airhandler.isInfluenced(w.position)) {
-                indiceForClear.push_back(index);
-            }
-            else {
-                Vertex v;
-                v.position = w.position;
-                float t = glm::clamp(glm::length(w.velocity) / maxWindSpeed, 0.0f, 1.0f);
-                v.color = glm::vec4(t, 1.0f - t, 0.0f, 1.0f);
-                windVertex.push_back(v);
-            }
-        }
-        std::sort(indiceForClear.begin(), indiceForClear.end(), std::greater<int>());
-        for (auto i : indiceForClear)
-            wind.erase(wind.begin() + i);
-        indiceForClear.clear();
-
-        if (displayWindPoints) {
-            for (AirVertex d : airhandler.windDirection) {
-                Vertex v;
-                v.position = d.position;
-                v.color = d.color;
-                windVertex.push_back(v);
-            }
-        }
-
-        shader_points.bind();
-        glUniformMatrix4fv(modelViewProjLocationPoints, 1, GL_FALSE, &mvp[0][0]);
-        VertexBuffer windBuffer(windVertex.data(), static_cast<uint32_t>(windVertex.size()));
-        windBuffer.bind();
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(windVertex.size()));
 
         //IMGUI Zeug
         ImGui_ImplOpenGL3_NewFrame();
@@ -513,142 +296,7 @@ int main(int argc, char** argv)
             ImGuiWindowFlags_NoTitleBar
         );
 
-        float tempor;
-
-        if (ImGui::BeginTabBar("SettingsTabs"))
-        {
-            if (ImGui::BeginTabItem("Wind"))
-            {
-                ImGui::Text("Wind settings");
-
-                const char* windTypes[] =
-                {
-                    "Default",
-                    "Nothing",
-                    "Custom",
-                    "zVortex"
-                };
-
-                static int currentWind = 0;
-
-                if (ImGui::Combo("Wind Type", &currentWind, windTypes, IM_ARRAYSIZE(windTypes)))
-                {
-
-                    if (currentWind != 2) {
-                        
-                        airhandler.plannedWinds(static_cast<WindType>(currentWind));
-                        
-                    }
-                }
-
-                if (currentWind == 2) {
-                    if (ImGui::CollapsingHeader("Custom Wind normal"))
-                    {
-                        /*
-                        ImGui::SliderFloat(
-                            "X",
-                            &customWindDirectionX,
-                            -1.0f,
-                            1.0f
-                        );
-
-                        ImGui::SliderFloat(
-                            "Y",
-                            &customWindDirectionY,
-                            -1.0f,
-                            1.0f
-                        );
-                        ImGui::SliderFloat(
-                            "Z",
-                            &customWindDirectionZ,
-                            -1.0f,
-                            1.0f
-                        );
-                    }
-
-                    airhandler.setNumbersWind(glm::vec3(customWindDirectionX, customWindDirectionY, customWindDirectionZ));
-                    */
-
-                        static char x[128] = "";
-                        static char y[128] = "";
-                        static char z[128] = "";
-
-                        ImGui::InputText("X", x, IM_ARRAYSIZE(x));
-                        ImGui::InputText("Y", y, IM_ARRAYSIZE(y));
-                        ImGui::InputText("Z", z, IM_ARRAYSIZE(z));
-
-                        if(ImGui::Button("refresh")) airhandler.setVariablesWind(x, y, z);
-
-                        ImGui::Separator();
-                    }
-                }
-
-                ImGui::SliderFloat(
-                    "Windspeed",
-                    &windSpeed,
-                    0.0f,
-                    maxWindSpeed
-                );
-               
-                if (windSpeed <= 0.0f || currentWind == 1) spawnWindParticles = false;
-
-                ImGui::Checkbox("Spawn Windparticles", &spawnWindParticles);
-
-                ImGui::SliderFloat(
-                    "Windparticles Spawntime",
-                    &windParticleSpawnTime,
-                    0.0f,
-                    0.3f
-                );
-
-                ImGui::EndTabItem();
-            }
-
-            if (ImGui::BeginTabItem("Gameobjects"))
-            {
-                ImGui::Text("Gameobject settings");
-
-                if (ImGui::Button("Spawn Cube")) {
-                    objects.push_back(mLoader.addGameObject("Cube", glm::vec3(2.0f)));
-                }
-
-                ImGui::EndTabItem();
-            }
-
-            if (ImGui::BeginTabItem("Simulation"))
-            {
-                ImGui::Text("Simulation settings");
-                
-                if (ImGui::Button("Reset Simulation")) {
-                    resetSimulation(objects, wind);
-                    time = 0;
-                }
-
-                
-
-                if (ImGui::Button("Display Windpoints")) {
-                    displayWindPoints = !displayWindPoints;
-                }
-
-
-                ImGui::SliderFloat(
-                    "Simulation speed",
-                    &simulationSpeed,
-                    0.0f,
-                    2.0f,
-                    "%.2f",
-                    ImGuiSliderFlags_Logarithmic
-                );
-               
-                ImGui::Text("Simulation constants");
-                ImGui::Separator();
-                ImGui::Text("FPS %.1f", ImGui::GetIO().Framerate);
-                ImGui::Text("Current Air Resolution %.001f", airResolution);
-                ImGui::EndTabItem();
-            }
-
-            ImGui::EndTabBar();
-        }
+        
 
         ImGui::End();
         
