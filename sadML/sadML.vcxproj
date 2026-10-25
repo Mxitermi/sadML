@@ -160,6 +160,7 @@
     <ClCompile Include="..\dependencies\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\dependencies\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Index_buffer.h" />
+    <ClCompile Include="Lattice.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model_loader.cpp" />
     <ClCompile Include="shader.cpp" />
@@ -167,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="Lattice.h" />
     <ClInclude Include="model_loader.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="vertex.h" />

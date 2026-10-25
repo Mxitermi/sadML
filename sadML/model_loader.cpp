@@ -104,7 +104,6 @@ VertexCombo ModelLoader::loadObjFromFile(const char* path) {
         }
     }
     combo.normalize();
-    normalsFirst = combo.getNormals();
 
     return combo;
 }

@@ -32,6 +32,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include "Lattice.h"
 #include <algorithm>
 int main(int argc, char** argv)
 {
@@ -127,9 +128,16 @@ int main(int argc, char** argv)
     bool moveUp = false;
     bool moveDown = false;
 
+    //Code
+
+    Lattice lattice(100);
+    
+    lattice.updateLatticeToDraw();
+    //Code end
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    glEnable(GL_CULL_FACE); //Aufpassen wenn selber dreiecke erstellen wegen windingorder
+    //glEnable(GL_CULL_FACE); //Aufpassen wenn selber dreiecke erstellen wegen windingorder
     glEnable(GL_DEPTH_TEST);
 
     static float timer = 0.0f;
@@ -264,8 +272,17 @@ int main(int argc, char** argv)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 mvp = camera.getViewProj();
-        
-        
+
+        lattice.nextTimeStep();
+
+        VertexBuffer vBuffer(lattice.latticeToDrawVertecies.data(), lattice.sizeVertecies);
+        IndexBuffer iBuffer(lattice.latticeToDrawIndices.data(), lattice.sizeIndices, sizeof(uint32_t));
+        vBuffer.bind();
+        iBuffer.bind();
+        shader_lines.bind();
+
+        glUniformMatrix4fv(modelViewProjLocation, 1, GL_FALSE, &mvp[0][0]);
+        glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(lattice.sizeIndices), GL_UNSIGNED_INT, 0);
 
         //IMGUI Zeug
         ImGui_ImplOpenGL3_NewFrame();

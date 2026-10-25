@@ -106,30 +106,6 @@ struct VertexCombo {
 		vertices[vertex].normal += normal;
 	}
 
-	std::vector<Vertex> getNormals() {
-		std::vector<Vertex> vertexnormal;
-		for (Vertex v : vertices) {
-			Vertex w;
-			w.color = glm::vec4(0.0, 0.9f, 0.9, 1.0f);
-			w.position = v.position;
-			vertexnormal.push_back(w);
-			w.position = v.normal + v.position;
-			vertexnormal.push_back(w);
-		}
-
-		for (int i = 2; i < numIndices; i += 3) {
-			Vertex w;
-			w.color = glm::vec4(0.9, 0.9f, 0, 1.0f);
-			w.position = vertices[indices[i - 2]].position + vertices[indices[i - 1]].position + vertices[indices[i]].position;
-			w.position = w.position / 3.0f;
-			vertexnormal.push_back(w);
-			w.position = w.position + glm::normalize(vertices[indices[i - 2]].normal + vertices[indices[i - 1]].normal + vertices[indices[i]].normal);
-			vertexnormal.push_back(w);
-		}
-
-		return vertexnormal;
-	}
-
 	void normalize() {
 		for (Vertex& v : vertices) {
 			v.normal = glm::normalize(v.normal);
@@ -143,6 +119,5 @@ struct VertexCombo {
 		indices.push_back(i2);
 		indices.push_back(i3);
 	}
-
 
 };

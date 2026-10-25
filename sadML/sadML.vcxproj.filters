@@ -54,6 +54,9 @@
     <ClCompile Include="..\dependencies\imgui\backends\imgui_impl_opengl3.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="Lattice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex_buffer.h">
@@ -72,6 +75,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="vertex.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lattice.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
