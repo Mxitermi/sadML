@@ -2,13 +2,12 @@
 
 #include "defines.h";
 #include <vector>
-#include <random>
 
 class Lattice {
 public:  
 	Lattice(int size); //even
     void updateLatticeToDraw();
-    void nextTimeStep();
+    void nextTimeStep(float step);
 	struct LatticeCell {
 		glm::vec2 directions[9]; 
 		float weights[9]; 
@@ -18,7 +17,6 @@ public:
         bool isInputWall = false;
         bool isExitWall = false;
         void initialize() {
-            srand(static_cast <unsigned> (time(0)));
             directions[0] = glm::vec2(0.0f);
             directions[1] = glm::vec2(0.0f, 1.0f);
             directions[2] = glm::vec2(1.0f, 1.0f);
@@ -38,16 +36,14 @@ public:
             weights[6] = 1 / 36.0f;
             weights[7] = 1 / 9.0f;
             weights[8] = 1 / 36.0f;
+            
+            applyInputBoundary();
+           }
 
-
-            std::random_device rd;
-            std::mt19937 gen(rd());
-
-            std::uniform_real_distribution<float> dist(0.0f, 0.2f);
-
+        void applyInputBoundary() {
             const float rho = 1.0f;
             const float ux = 0.05f;
-            const float uy = 0.0f;
+            const float uy = 0.00f;
 
             for (int i = 0; i < 9; i++) {
                 float cx = directions[i].x;
@@ -63,13 +59,22 @@ public:
                 distibution[i] = feq;
                 nextGendistibutions[i] = feq;
             }
-           }
+        }
+
         float ux() {
             float jx = 0.0f;
             for (int i = 0; i < 9; i++) {
                 jx += distibution[i] * directions[i].x;
             }
             return jx / density();
+        }
+
+        float uy() {
+            float jy = 0.0f;
+            for (int i = 0; i < 9; i++) {
+                jy += distibution[i] * directions[i].y;
+            }
+            return jy / density();
         }
 
         float density() {

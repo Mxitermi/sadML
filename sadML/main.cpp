@@ -273,7 +273,7 @@ int main(int argc, char** argv)
 
         glm::mat4 mvp = camera.getViewProj();
 
-        lattice.nextTimeStep();
+        lattice.nextTimeStep(time);
 
         VertexBuffer vBuffer(lattice.latticeToDrawVertecies.data(), lattice.sizeVertecies);
         IndexBuffer iBuffer(lattice.latticeToDrawIndices.data(), lattice.sizeIndices, sizeof(uint32_t));

@@ -14,12 +14,58 @@ Lattice::Lattice(int size) {
 		}else if ((i+1) % size == 0) {
 			cell.isExitWall = true;
 		}
+		else {
+			
+			int x = i % size;
+			int y = (i - x) / size;
+
+			int mX = 50;
+			int mY = 50;
+			int r = 10;
+
+			int dx = mX - x;
+			int dy = mY - y;
+
+			if (dx * dx + dy * dy <= r * r) {
+				cell.isBounceBackWall = true;
+			}
+		
+		}
+		
 		latticeObject.push_back(cell);
 	}
 	latticeSize = size;
 }
 
-void Lattice::nextTimeStep() {
+void Lattice::nextTimeStep(float step) {
+
+	for (int i = 0; i < latticeObject.size(); i++)
+	{
+		LatticeCell& cell = latticeObject[i];
+		if (cell.isBounceBackWall) {
+			cell.isBounceBackWall = false;
+		}
+		if (i < latticeSize || i >= latticeSize * latticeSize - latticeSize) {
+			cell.isBounceBackWall = true;
+		}
+			else {
+
+				int x = i % latticeSize;
+				int y = (i - x) / latticeSize;
+
+				int mX = 50;
+				int mY = 50 + std::sin(step) * 20;
+				int r = 10;
+
+				int dx = mX - x;
+				int dy = mY - y;
+
+				if (dx * dx + dy * dy <= r * r) {
+					cell.isBounceBackWall = true;
+				}
+
+			}
+	}
 
 	int oppositeDirection[] = {
 	0, // 0: Ruhe
@@ -34,12 +80,10 @@ void Lattice::nextTimeStep() {
 	};
 
 	for (int j = 0; j < latticeObject.size(); j++) {
-		
+
 		LatticeCell cell = latticeObject[j];
 
 		if (cell.isBounceBackWall) {
-			for (int i = 0; i < 9; i++)
-				cell.nextGendistibutions[i] = 0.0f;
 			continue;
 		}
 
@@ -60,10 +104,9 @@ void Lattice::nextTimeStep() {
 
 		float tau = viskus * 3.0f + 1.0f/2.0f; 
 
-
-
 		for (int i = 0; i < 9; i++) {
-			eq = cell.weights[i] * rho * (1+glm::dot(cell.directions[i], u) / csSQ + (glm::dot(cell.directions[i], u) * glm::dot(cell.directions[i], u))/(2*csSQ*csSQ)- glm::dot(u, u)/2*csSQ);
+			
+			eq = cell.weights[i] * rho * (1+glm::dot(cell.directions[i], u) / csSQ + (glm::dot(cell.directions[i], u) * glm::dot(cell.directions[i], u))/(2*csSQ*csSQ)- glm::dot(u, u)/(2*csSQ));
 			fistar = cell.distibution[i] - (1.0f / tau) * (cell.distibution[i] - eq);
 			int x = j % latticeSize;
 			int y = (j - x) / latticeSize;
@@ -72,44 +115,46 @@ void Lattice::nextTimeStep() {
 			int targetY = y + cell.directions[i].y;
 
 			int k = i;
-			
-			const float ux = 0.05f;
-			const float uy = 0.0f;
 
 			if (cell.isInputWall) {
-				if (!(i >= 2 && i <= 4)) continue;
-				float cx = cell.directions[i].x;
-				float cy = cell.directions[i].y;
-
-				float cu = cx * ux + cy * uy;
-				float u2 = ux * ux + uy * uy;
-
-				float feq = cell.weights[i] * rho *
-					(1.0f + 3.0f * cu
-						+ 4.5f * cu * cu
-						- 1.5f * u2);
-				fistar = feq;
+				if(i >= 6)  continue;
 			}
 
 			if (cell.isExitWall) {
-				if (i < 6) continue;
-				
+					if (i >= 2 && i <= 4) continue;
 			}
 
-			if (latticeObject[targetX + targetY * latticeSize].isBounceBackWall) {
+			if (latticeObject[targetX + targetY * latticeSize].isBounceBackWall)
+			{
 				targetX = x;
 				targetY = y;
 				k = oppositeDirection[i];
 			}
 
+
 			latticeObject[targetX + targetY * latticeSize].nextGendistibutions[k] = fistar;
 
 		}
 	}
+
+	
+
+	for (int i = 0; i < latticeObject.size(); ++i) {
+		LatticeCell& cell = latticeObject[i];
+
+		if (cell.isExitWall) {
+			for (int j = 0; j < 9; ++j) {
+				cell.nextGendistibutions[j] = latticeObject[i - 1].nextGendistibutions[j];
+			}
+		}
+		else if (cell.isInputWall) {
+			cell.applyInputBoundary();
+		}
+	}
+
 	for (int i = 0; i < latticeObject.size(); i++) {
 		latticeObject[i].switchGens();
 	}
-
 
 	updateLatticeToDraw();
 }
@@ -125,14 +170,17 @@ void Lattice::updateLatticeToDraw()
 	for (int i = 0; i < latticeSize; i++) {
 		for (int j = 0; j < latticeSize; j++) {
 			LatticeCell cell = latticeObject[i + latticeSize * j];
-			float avrg = cell.ux();
-			avrg *= 2;
-			avrg += 0.5;
-			glm::vec4 color = glm::vec4(avrg, avrg, avrg, 1.0f);
+			float ux = cell.ux();
+			ux *= 10;
+			ux += 0.2;
+			float uy = cell.uy();
+			uy *= 10;
+			uy += 0.2;
+			glm::vec4 color = glm::vec4(ux +uy, ux + uy, ux + uy, 1.0f);
 
 			if(cell.isBounceBackWall) color = glm::vec4(0.0f, 0.8f, 0.0f, 1.0f);
-			if (cell.isInputWall) color = glm::vec4(0.0f, 0.3f, 0.8f, 1.0f);
-			if (cell.isExitWall) color = glm::vec4(8.0f, 0.3f, 0.0f, 1.0f);
+			//if (cell.isInputWall) color = glm::vec4(0.0f, 0.3f, 0.8f, 1.0f);
+			//if (cell.isExitWall) color = glm::vec4(8.0f, 0.3f, 0.0f, 1.0f);
 
 			Vertex v;
 			v.position = glm::vec3( -1 * (latticeSize / 2) + i * drawScale, -(latticeSize / 2) + j* drawScale, 0.0f);
