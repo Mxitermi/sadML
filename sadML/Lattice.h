@@ -14,6 +14,9 @@ public:
 		float weights[9]; 
         float distibution[9];
         float nextGendistibutions[9];
+        bool isBounceBackWall = false;
+        bool isInputWall = false;
+        bool isExitWall = false;
         void initialize() {
             srand(static_cast <unsigned> (time(0)));
             directions[0] = glm::vec2(0.0f);
@@ -58,7 +61,7 @@ public:
                         + 4.5f * cu * cu
                         - 1.5f * u2);
                 distibution[i] = feq;
-                nextGendistibutions[i] = 0.0f;
+                nextGendistibutions[i] = feq;
             }
            }
         float ux() {

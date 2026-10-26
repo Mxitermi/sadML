@@ -1,10 +1,19 @@
 #include "Lattice.h"
+#include <algorithm>
 
 Lattice::Lattice(int size) {
 	for (int i = 0; i < size * size; i++)
 	{
 		LatticeCell cell;
 		cell.initialize();
+		if (i < size || i >= size * size - size ) {
+			cell.isBounceBackWall = true;
+		}else
+		if (i % size == 0) {
+			cell.isInputWall = true;
+		}else if ((i+1) % size == 0) {
+			cell.isExitWall = true;
+		}
 		latticeObject.push_back(cell);
 	}
 	latticeSize = size;
@@ -27,6 +36,12 @@ void Lattice::nextTimeStep() {
 	for (int j = 0; j < latticeObject.size(); j++) {
 		
 		LatticeCell cell = latticeObject[j];
+
+		if (cell.isBounceBackWall) {
+			for (int i = 0; i < 9; i++)
+				cell.nextGendistibutions[i] = 0.0f;
+			continue;
+		}
 
 		float rho = 0;
 		float jx = 0;
@@ -51,29 +66,44 @@ void Lattice::nextTimeStep() {
 			eq = cell.weights[i] * rho * (1+glm::dot(cell.directions[i], u) / csSQ + (glm::dot(cell.directions[i], u) * glm::dot(cell.directions[i], u))/(2*csSQ*csSQ)- glm::dot(u, u)/2*csSQ);
 			fistar = cell.distibution[i] - (1.0f / tau) * (cell.distibution[i] - eq);
 			int x = j % latticeSize;
-			int y = j / latticeSize;
+			int y = (j - x) / latticeSize;
 
-			int dx = cell.directions[i].x;
-			int dy = cell.directions[i].y;
+			int targetX = x + cell.directions[i].x;
+			int targetY = y + cell.directions[i].y;
 
-			int nx = x + dx;
-			int ny = y + dy;
+			int k = i;
+			
+			const float ux = 0.05f;
+			const float uy = 0.0f;
 
-			if (nx >= 0 && nx < latticeSize &&
-				ny >= 0 && ny < latticeObject.size() / latticeSize)
-			{
-				// Zielzelle liegt im Gitter: normales Streaming
-				int target = ny * latticeSize + nx;
+			if (cell.isInputWall) {
+				if (!(i >= 2 && i <= 4)) continue;
+				float cx = cell.directions[i].x;
+				float cy = cell.directions[i].y;
 
-				latticeObject[target].nextGendistibutions[i] = fistar;
+				float cu = cx * ux + cy * uy;
+				float u2 = ux * ux + uy * uy;
+
+				float feq = cell.weights[i] * rho *
+					(1.0f + 3.0f * cu
+						+ 4.5f * cu * cu
+						- 1.5f * u2);
+				fistar = feq;
 			}
-			else
-			{
-				// Ziel liegt außerhalb: Bounce-Back an der Wand
-				int opposite = oppositeDirection[i];
 
-				latticeObject[j].nextGendistibutions[opposite] = fistar;
+			if (cell.isExitWall) {
+				if (i < 6) continue;
+				
 			}
+
+			if (latticeObject[targetX + targetY * latticeSize].isBounceBackWall) {
+				targetX = x;
+				targetY = y;
+				k = oppositeDirection[i];
+			}
+
+			latticeObject[targetX + targetY * latticeSize].nextGendistibutions[k] = fistar;
+
 		}
 	}
 	for (int i = 0; i < latticeObject.size(); i++) {
@@ -96,21 +126,26 @@ void Lattice::updateLatticeToDraw()
 		for (int j = 0; j < latticeSize; j++) {
 			LatticeCell cell = latticeObject[i + latticeSize * j];
 			float avrg = cell.ux();
-			avrg *= 5;
+			avrg *= 2;
 			avrg += 0.5;
+			glm::vec4 color = glm::vec4(avrg, avrg, avrg, 1.0f);
+
+			if(cell.isBounceBackWall) color = glm::vec4(0.0f, 0.8f, 0.0f, 1.0f);
+			if (cell.isInputWall) color = glm::vec4(0.0f, 0.3f, 0.8f, 1.0f);
+			if (cell.isExitWall) color = glm::vec4(8.0f, 0.3f, 0.0f, 1.0f);
 
 			Vertex v;
 			v.position = glm::vec3( -1 * (latticeSize / 2) + i * drawScale, -(latticeSize / 2) + j* drawScale, 0.0f);
-			v.color = glm::vec4(avrg, avrg, avrg, 1.0f);
+			v.color = color;
 			Vertex w;
 			w.position = glm::vec3(-(latticeSize / 2) + (i + 1)* drawScale, -(latticeSize / 2) + j * drawScale, 0.0f);
-			w.color = glm::vec4(avrg, avrg, avrg, 1.0f);
+			w.color = color;
 			Vertex u;
 			u.position = glm::vec3(-(latticeSize / 2) + i * drawScale, -(latticeSize / 2) + (j+1) * drawScale, 0.0f);
-			u.color = glm::vec4(avrg, avrg, avrg, 1.0f);
+			u.color = color;
 			Vertex o;
 			o.position = glm::vec3(-(latticeSize / 2) + (i+1) * drawScale, -(latticeSize / 2) + (j+1)* drawScale, 0.0f);
-			o.color = glm::vec4(avrg, avrg, avrg, 1.0f);
+			o.color = color;
 
 			latticeToDrawVertecies.push_back(v);
 			latticeToDrawVertecies.push_back(w);
