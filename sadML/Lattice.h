@@ -43,7 +43,7 @@ public:
         void applyInputBoundary() {
             const float rho = 1.0f;
             const float ux = 0.05f;
-            const float uy = 0.00f;
+            const float uy = 0.01f;
 
             for (int i = 0; i < 9; i++) {
                 float cx = directions[i].x;
@@ -98,5 +98,4 @@ public:
 private:
     int latticeSize;
     std::vector<LatticeCell> latticeObject;
-
 };

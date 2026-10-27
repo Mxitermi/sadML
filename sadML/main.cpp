@@ -147,8 +147,6 @@ int main(int argc, char** argv)
         time += delta;
         SDL_Event event;
 
-        
-
         while (SDL_PollEvent(&event))
         {
             ImGui_ImplSDL3_ProcessEvent(&event);

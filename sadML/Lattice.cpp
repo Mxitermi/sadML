@@ -41,9 +41,26 @@ void Lattice::nextTimeStep(float step) {
 
 	for (int i = 0; i < latticeObject.size(); i++)
 	{
+		float cnt = 0.0;
 		LatticeCell& cell = latticeObject[i];
 		if (cell.isBounceBackWall) {
+			int x = i % latticeSize;
+			int y = (i - x) / latticeSize;
 			cell.isBounceBackWall = false;
+			for (int j = 1; j < 9; j++) {
+				int targetX = x + cell.directions[j].x;
+				int targetY = y + cell.directions[j].y;
+				if (targetY > 0 && targetX > 0 && targetY < latticeSize && targetX < latticeSize) { //Problem mit der Dichte und Massenerhaltung
+					if (!latticeObject[targetX + targetY * latticeSize].isBounceBackWall) {
+						for (int k = 0; k < 9; k++) {
+							latticeObject[x + y * latticeSize].distibution[k] += latticeObject[targetX + targetY * latticeSize].distibution[k];
+						}
+						cnt++;
+					}
+				}
+			}
+			for (int k = 0; k < 9; k++)
+				latticeObject[x + y * latticeSize].distibution[k] /= cnt;
 		}
 		if (i < latticeSize || i >= latticeSize * latticeSize - latticeSize) {
 			cell.isBounceBackWall = true;
@@ -62,6 +79,7 @@ void Lattice::nextTimeStep(float step) {
 
 				if (dx * dx + dy * dy <= r * r) {
 					cell.isBounceBackWall = true;
+					for (int i = 0; i < 9; i++) cell.distibution[i] = 0.0f;
 				}
 
 			}
@@ -169,14 +187,14 @@ void Lattice::updateLatticeToDraw()
 
 	for (int i = 0; i < latticeSize; i++) {
 		for (int j = 0; j < latticeSize; j++) {
-			LatticeCell cell = latticeObject[i + latticeSize * j];
+			LatticeCell& cell = latticeObject[i + latticeSize * j];
 			float ux = cell.ux();
-			ux *= 10;
-			ux += 0.2;
 			float uy = cell.uy();
-			uy *= 10;
-			uy += 0.2;
-			glm::vec4 color = glm::vec4(ux +uy, ux + uy, ux + uy, 1.0f);
+			float g = std::sqrt(std::pow(ux, 2) + std::pow(uy, 2));
+			g *= 40;
+			float sigmoid = 1 / (1 + std::exp(-g));
+			
+			glm::vec4 color = glm::vec4(sigmoid, sigmoid, sigmoid, 1.0f);
 
 			if(cell.isBounceBackWall) color = glm::vec4(0.0f, 0.8f, 0.0f, 1.0f);
 			//if (cell.isInputWall) color = glm::vec4(0.0f, 0.3f, 0.8f, 1.0f);
